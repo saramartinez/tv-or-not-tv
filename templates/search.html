@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block body %}
+<h2>Search</h2>
+<h3>Find TV shows to add to your personalized listings:</h3>
+<form action="{{ url_for("search") }}" method="POST">
+    <input type="text" name="query">
+    <input type="submit">
+</form>
+{% endblock %}

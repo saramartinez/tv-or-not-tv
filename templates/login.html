@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block body %}
+<h2>Returning users, log in:</h2>
+<form action="/login" method="POST">
+    <label><input type="email" name="email" placeholder="Email Address" required autofocus /></label><br>
+    <label><input type="password" name="password" placeholder="Password" required /></label><br>
+    <label><input type="submit" value="Log In"></label>
+</form>
+{% endblock %}

@@ -1,0 +1,38 @@
+<html>
+<head>
+    <title>TV...or Not TV</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <h1>TV... or Not TV</h1>
+<ul class="nav nav-tabs">
+<li><a href="/">Home</a></li>
+{% if not session['user'] %}
+<li><a href="/login">Log In</a></li>
+<li><a href="/signup">Sign up</a></li>
+{% endif %}
+{% if session['user'] %}
+<li><a href="/favorites/{{ session['user'] }}">Favorites</a></li>
+<li><a href="/logout">Log out</a></li>
+{% endif %}
+<li><form class="search" action="{{ url_for("search") }}" method="POST">
+    <input type="text" name="query">
+    <input type="submit" value = Search>
+</form></li>
+</ul>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class=flashes>
+{% for message in messages %}
+  <li>{{ message }}</li>
+{% endfor %}
+</ul></div>
+{% endif %}
+{% endwith %}
+
+{% block body %}
+{% endblock %}
+</body>
+</html>

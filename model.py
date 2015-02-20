@@ -5,12 +5,11 @@ from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
 
 ENGINE = create_engine("sqlite:///tv.db", echo=True)
 session = scoped_session(sessionmaker(bind=ENGINE,
-                                      autocommit =False,
+                                      autocommit = False,
                                       autoflush = False))
 
 Base = declarative_base()
 Base.query = session.query_property()
-
 
 ### Class declarations go here
 class User(Base):
@@ -55,8 +54,8 @@ class Favorite(Base):
     __tablename__ = "favorites"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('movies.id'))
-    show_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
+    show_id = Column(Integer, ForeignKey('shows.id'))
 
     user = relationship("User", backref=backref("users", order_by=id))
     show = relationship("Show", backref=backref("shows"))
