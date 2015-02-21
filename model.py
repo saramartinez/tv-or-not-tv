@@ -65,6 +65,7 @@ class Favorite(Base):
 
 ### End class declarations
 
+
 def main():
     """Because I might need this"""
     pass

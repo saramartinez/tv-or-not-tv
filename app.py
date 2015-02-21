@@ -1,10 +1,14 @@
 from flask import Flask, render_template, redirect, request, session, flash, url_for
 from model import session as modelsession
 from model import User, Show, Service, Favorite
+import sys
+import os
+import requests
+import json
 
 app = Flask(__name__)
 app.secret_key = 'comingsoon'
-
+ROVI_API_KEY = os.environ['ROVI_TV_LISTINGS_API_KEY'] 
 
 @app.route("/")
 def index():
@@ -13,18 +17,37 @@ def index():
 @app.route("/signup", methods=['GET'])
 def show_signup():
     """Display registration form"""
+
     return render_template("signup.html")
 
-@app.route("/signup", methods=['POST'])
+@app.route("/find-provider", methods=['GET'])
+def find_provider():
+    zipcode = request.args.get("zipcode")
+    providers = requests.get("http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/" + str(zipcode) + "/info?locale=en-US&countrycode=US&format=json&apikey=" + ROVI_API_KEY).json()
+    services_obj = providers['ServicesResult']['Services']['Service']
+    print services_obj
+    return services_obj
+    # return url_for('show_signup', services_obj=services_obj)
+    # service_name = providers['ServicesResult']['Services']['Service'][0]['Name']
+    # service_id = providers['ServicesResult']['Services']['Service'][0]['ServiceId']
+
+
+
+
+@app.route("/signup", methods=['GET', 'POST'])
 def process_signup():
     """Add user information to database"""
     new_email = request.form.get("email")
     new_password = request.form.get("password")
 
+    name = request.form.get("username")
+    zipcode = request.form.get("zipcode")
+    timezone = request.form.get("timezone")
+
     existing_user = modelsession.query(User).filter(User.email==new_email).first()
     
     if existing_user == None:
-        new_user = User(email=new_email, password=new_password)
+        new_user = User(name=name, email=new_email, password=new_password, zipcode=zipcode, timezone=timezone)
         modelsession.add(new_user)
         modelsession.commit()
         session['user'] = new_user.id

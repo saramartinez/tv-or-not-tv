@@ -3,3 +3,4 @@ env/
 secrets.sh
 examples/
 test.html
+*.db

@@ -1,11 +1,42 @@
 {% extends 'base.html' %}
 {% block body %}
+<script>
+
+$(document).ready(function() {
+	$("#get-service").click( function(e) {
+		e.preventDefault();
+		var url = "/find-provider?zipcode=" + $("#zipcode-field").val();
+		$.get(url, function(result) {
+			var services = result.services
+			$("#service-options").html(services);
+		});
+	});
+});
+
+</script>
+
+
+
 <h2>New users, sign up:</h2>
-<form action="/signup" method="POST">
+<form id="signup" action="/signup" method="POST">
     <label><input type="username" name="username" placeholder="Name" required /></label><br>
     <label><input type="email" name="email" placeholder="Email Address" required autofocus /></label><br>
     <label><input type="password" name="password" placeholder="Password" required /></label><br>
-    <label><input type="zipcode" name="zipcode" placeholder="Zip Code" required /></label><br>
+    <label><input type="zipcode" id="zipcode-field" name="zipcode" placeholder="Zip Code" required /></label> <button id="get-service" type="button">Find service provider</button>
+<p>timezone</p>
+<p>service choice:</p>
+
+
+    <div id="service-options">
+    	{% for service in services %}
+    		<li><label><input type="radio" name="service-provider" value={{ obj['Name'] }}>{{ obj['Name'] }}</label></li>
+    	{% endfor %}
+    </div>
+
+
+<br><br><br>
+
+
 
     <label><input type="submit" value="Sign Up"></label>
 </form>
