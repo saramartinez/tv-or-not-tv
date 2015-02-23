@@ -7,9 +7,11 @@ $(document).ready(function() {
 		var url = "/find-provider?zipcode=" + $("#zipcode-field").val();
 		$.get(url,
 			function(result) {
-			var services = {{ services }}
-			console.log(result);
-			$("#service-options").html(services);
+				console.log(result.services)
+				$(result.services).each( function() {
+					$("#service-options").append("<li><label><input type='radio' name='service-provider' value='" + this['ServiceId'] + "'>" + this['Name'] + "</label></li>"
+						);
+				});
 		});
 	});
 });
@@ -19,21 +21,16 @@ $(document).ready(function() {
 
 
 <h2>New users, sign up:</h2>
-    <span id="service-options">
-    {% autoescape false %}
-    	{% for service in services %}
-    		<li><label><input type="radio" name="service-provider" value="{{ service['ServiceId'] }}">{{ service['Name'] }}</label></li>
-  
-    	{% endfor %}
-    {% endautoescape %}
-    </span>
+
 <form id="signup" action="/signup" method="POST">
-    <label><input type="username" name="username" placeholder="Name" required /></label><br>
-    <label><input type="email" name="email" placeholder="Email Address" required autofocus /></label><br>
+    <label><input type="username" name="username" placeholder="Name" required autofocus /></label><br>
+    <label><input type="email" name="email" placeholder="Email Address" required /></label><br>
     <label><input type="password" name="password" placeholder="Password" required /></label><br>
     <label><input type="zipcode" id="zipcode-field" name="zipcode" placeholder="Zip Code" required /></label> <button id="get-service" type="button">Find service provider</button>
 <p>timezone</p>
 <p>service choice:</p>
+    <ul id="service-options">
+    </ul>
 
 
 

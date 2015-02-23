@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, session, flash, url_for
+from flask import Flask, render_template, redirect, request, session, flash, url_for, jsonify
 from model import session as modelsession
 from model import User, Show, Service, Favorite
 import sys
@@ -24,9 +24,7 @@ def find_provider():
     zipcode = request.args.get("zipcode")
     providers = requests.get("http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/" + str(zipcode) + "/info?locale=en-US&countrycode=US&format=json&apikey=" + ROVI_API_KEY).json()
     services = providers['ServicesResult']['Services']['Service']
-    for service in services:
-        print service['Name'], service['ServiceId']
-    return render_template("signup.html", services=services)
+    return jsonify({'services': services})
 
 
 @app.route("/signup", methods=['GET', 'POST'])
