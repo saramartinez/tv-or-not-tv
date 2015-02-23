@@ -17,21 +17,16 @@ def index():
 @app.route("/signup", methods=['GET'])
 def show_signup():
     """Display registration form"""
-
     return render_template("signup.html")
 
 @app.route("/find-provider", methods=['GET'])
 def find_provider():
     zipcode = request.args.get("zipcode")
     providers = requests.get("http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/" + str(zipcode) + "/info?locale=en-US&countrycode=US&format=json&apikey=" + ROVI_API_KEY).json()
-    services_obj = providers['ServicesResult']['Services']['Service']
-    print services_obj
-    return services_obj
-    # return url_for('show_signup', services_obj=services_obj)
-    # service_name = providers['ServicesResult']['Services']['Service'][0]['Name']
-    # service_id = providers['ServicesResult']['Services']['Service'][0]['ServiceId']
-
-
+    services = providers['ServicesResult']['Services']['Service']
+    for service in services:
+        print service['Name'], service['ServiceId']
+    return render_template("signup.html", services=services)
 
 
 @app.route("/signup", methods=['GET', 'POST'])

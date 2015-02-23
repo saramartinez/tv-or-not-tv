@@ -4,10 +4,11 @@
 
 $(document).ready(function() {
 	$("#get-service").click( function(e) {
-		e.preventDefault();
 		var url = "/find-provider?zipcode=" + $("#zipcode-field").val();
-		$.get(url, function(result) {
-			var services = result.services
+		$.get(url,
+			function(result) {
+			var services = {{ services }}
+			console.log(result);
 			$("#service-options").html(services);
 		});
 	});
@@ -18,6 +19,14 @@ $(document).ready(function() {
 
 
 <h2>New users, sign up:</h2>
+    <span id="service-options">
+    {% autoescape false %}
+    	{% for service in services %}
+    		<li><label><input type="radio" name="service-provider" value="{{ service['ServiceId'] }}">{{ service['Name'] }}</label></li>
+  
+    	{% endfor %}
+    {% endautoescape %}
+    </span>
 <form id="signup" action="/signup" method="POST">
     <label><input type="username" name="username" placeholder="Name" required /></label><br>
     <label><input type="email" name="email" placeholder="Email Address" required autofocus /></label><br>
@@ -27,11 +36,7 @@ $(document).ready(function() {
 <p>service choice:</p>
 
 
-    <div id="service-options">
-    	{% for service in services %}
-    		<li><label><input type="radio" name="service-provider" value={{ obj['Name'] }}>{{ obj['Name'] }}</label></li>
-    	{% endfor %}
-    </div>
+
 
 
 <br><br><br>
