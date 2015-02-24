@@ -16,8 +16,8 @@
 <li><a href="/signup">Sign up</a></li>
 {% endif %}
 {% if session['user'] %}
-<li><a href="/favorites/{{ session['user'] }}">Favorites</a></li>
-<li><a href="/settings/{{ session['user'] }}">Settings</a></li>
+<li><a href="/favorites/{{ session['id'] }}">Favorites</a></li>
+<li><a href="/settings/{{ session['id'] }}">Settings</a></li>
 <li><a href="/logout">Log out</a></li>
 {% endif %}
 <li><form class="search" action="{{ url_for("search") }}" method="POST">
@@ -37,6 +37,5 @@
 
 {% block body %}
 {% endblock %}
-<script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.4/jstz.min.js"></script>
 </body>
 </html>

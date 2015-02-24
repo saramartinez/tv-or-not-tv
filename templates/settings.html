@@ -1,4 +1,26 @@
 {% extends 'base.html' %}
 {% block body %}
-settings go here!
+<h2>User Profile</h2>
+<p>Name: {{ user.name }}
+</p>
+
+<p>
+Email: {{ user.email }}
+</p>
+
+<p>
+Zipcode: {{ user.zipcode }}
+</p>
+
+
+<p>Password:
+New Password: 
+</p>
+
+{% if service_name %}
+{{ service_name }}
+{% else %}
+Select service
+{% endif %}
+
 {% endblock %}

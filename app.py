@@ -12,6 +12,7 @@ ROVI_API_KEY = os.environ['ROVI_TV_LISTINGS_API_KEY']
 
 @app.route("/")
 def index():
+    """Shows the index."""
     return render_template("index.html")
 
 @app.route("/signup", methods=['GET'])
@@ -21,15 +22,34 @@ def show_signup():
 
 @app.route("/find-provider", methods=['GET'])
 def find_provider():
+    """
+    AJAX request sends user zipcode from signup.html to
+    query Rovi TV Listings API for possible service 
+    providers during user signup and add provider to
+    database if not already there; then and return to
+    signup.html.
+    """
     zipcode = request.args.get("zipcode")
     providers = requests.get("http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/" + str(zipcode) + "/info?locale=en-US&countrycode=US&format=json&apikey=" + ROVI_API_KEY).json()
     services = providers['ServicesResult']['Services']['Service']
+    for each in services:
+        existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
+        if existing_service == None:
+            new_service = Service(name=each['Name'], id=each['ServiceId'])
+            modelsession.add(new_service)
+            modelsession.commit()
     return jsonify({'services': services})
 
 
 @app.route("/signup", methods=['GET', 'POST'])
 def process_signup():
-    """Add user information to database"""
+    """
+    Get user information from signup.html on form submit
+    and add as new user in database, then redirect to
+    index. If user already exists, redirect to login
+    page. Adds session cookies for logged_in = True and
+    id = user.id.
+    """
     new_email = request.form.get("email")
     new_password = request.form.get("password")
 
@@ -44,7 +64,8 @@ def process_signup():
         new_user = User(name=name, email=new_email, password=new_password, zipcode=zipcode, service_id=service_id, timezone=timezone)
         modelsession.add(new_user)
         modelsession.commit()
-        session['user'] = new_user.id
+        session['logged_in'] = True
+        session['id'] = new_user.id
         flash("Successfully created account. Add your favorite shows to get personalized listings!")
         return redirect("/")
     else:
@@ -63,7 +84,12 @@ def show_login():
 # Allow existing users to log in
 @app.route("/login", methods=['POST'])
 def process_login():
-    """Process user login"""
+    """
+    Checks to see if user exists in database and either
+    logs them in or redirects to signup page.
+    Adds session cookies for logged_in = True and
+    id = user.id.
+    """
     new_email = request.form.get('email')
     new_password = request.form.get('password')
 
@@ -77,14 +103,16 @@ def process_login():
             flash("Incorrect password. Please try again.")
             return render_template("login.html")
         else:
-            session['user'] = True
+            session['logged_in'] = True
+            session['id'] = existing_user.id
             flash("Successfully logged in.")
             return redirect("/")
 
 @app.route("/logout")
 def logout():
-    """Remove user from session"""
-    session.pop('user', None)
+    """Remove user.id and logged_in from session"""
+    session.pop('logged_in', None)
+    session.pop('id', None)
     flash("You were logged out.")
     return redirect("/")
 
@@ -102,6 +130,13 @@ def search_results():
 @app.route("/favorites/<int:id>")
 def show_favorites(id):
     return render_template("favorites.html", id=id)
+
+@app.route("/settings/<int:id>")
+def user_settings(id):
+    user_profile = modelsession.query(User).filter(User.id == id).one()
+    service_id = "x"
+    print type(user_profile)
+    return render_template("settings.html", id=id, user=user_profile, service_id = service_id)
 
 
 if __name__ == "__main__":
