@@ -1,14 +1,19 @@
 from flask import Flask, render_template, redirect, request, session, flash, url_for, jsonify
 from model import session as modelsession
 from model import User, Show, Service, Favorite
+from string import ascii_lowercase
 import sys
 import os
 import requests
 import json
+import hashlib
+from time import time
 
 app = Flask(__name__)
 app.secret_key = 'comingsoon'
-ROVI_API_KEY = os.environ['ROVI_TV_LISTINGS_API_KEY'] 
+ROVI_LISTINGS_API_KEY = os.environ['ROVI_TV_LISTINGS_API_KEY']
+ROVI_SEARCH_API_KEY = os.environ['ROVI_METADATA_SEARCH_API_KEY']
+ROVI_SEARCH_SECRET_KEY = os.environ['ROVI_METADATA_SHARED_SECRET'] 
 
 @app.route("/")
 def index():
@@ -30,7 +35,7 @@ def find_provider():
     signup.html.
     """
     zipcode = request.args.get("zipcode")
-    providers = requests.get("http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/" + str(zipcode) + "/info?locale=en-US&countrycode=US&format=json&apikey=" + ROVI_API_KEY).json()
+    providers = requests.get("http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/" + str(zipcode) + "/info?locale=en-US&countrycode=US&format=json&apikey=" + ROVI_LISTINGS_API_KEY).json()
     services = providers['ServicesResult']['Services']['Service']
     for each in services:
         existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
@@ -123,9 +128,19 @@ def search():
 @app.route("/search", methods=["POST"])
 def search_results():
     query = request.form.get('query')
-    results = modelsession.query(Movie).filter(Movie.title.like("%" + query + "%")).limit(50).all()
+    # db_results = modelsession.query(Show).filter(Show.title.like("%" + query + "%")).limit(50).all()
+    unix_time = int(time())
 
-    return render_template("movie_list.html", movies=results)
+    sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
+    print sig
+
+    api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&size=20&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
+
+    rovi_results = requests.get(api_request).json()
+    print rovi_results['searchResponse']['results'][0]
+    
+    return redirect("/")
+    # return render_template("tv_list.html", db_shows=db_results, rovi_shows=rovi_results)
 
 @app.route("/favorites/<int:id>")
 def show_favorites(id):
@@ -134,9 +149,7 @@ def show_favorites(id):
 @app.route("/settings/<int:id>")
 def user_settings(id):
     user_profile = modelsession.query(User).filter(User.id == id).one()
-    service_id = "x"
-    print type(user_profile)
-    return render_template("settings.html", id=id, user=user_profile, service_id = service_id)
+    return render_template("settings.html", id=id, user=user_profile)
 
 
 if __name__ == "__main__":

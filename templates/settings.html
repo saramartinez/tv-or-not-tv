@@ -1,26 +1,17 @@
 {% extends 'base.html' %}
 {% block body %}
 <h2>User Profile</h2>
-<p>Name: {{ user.name }}
+<p>edit</p>
+<p><strong>Name:</strong> {{ user.name }}</p>
+
+<p><strong>Email:</strong> {{ user.email }}</p>
+
+<p><strong>Zipcode:</strong> {{ user.zipcode }}</p>
+
+<p><strong>Service Provider:</strong> {{ user.service.name }}</p>
+
+<p><strong>Password:</strong> edit</p>
+
 </p>
-
-<p>
-Email: {{ user.email }}
-</p>
-
-<p>
-Zipcode: {{ user.zipcode }}
-</p>
-
-
-<p>Password:
-New Password: 
-</p>
-
-{% if service_name %}
-{{ service_name }}
-{% else %}
-Select service
-{% endif %}
 
 {% endblock %}

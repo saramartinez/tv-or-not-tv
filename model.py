@@ -19,9 +19,9 @@ class User(Base):
     email = Column(String(64), nullable=True)
     password = Column(String(64), nullable=True)
     name = Column(String(64), nullable=True)
-    zipcode = Column(String(15), nullable=True) #postalcode in rovi
+    zipcode = Column(String(15), nullable=True)
     timezone = Column(String(64), nullable=True)
-    service_id = Column(Integer, ForeignKey('services.id')) # serviceid in rovi
+    service_id = Column(Integer, ForeignKey('services.id')) # ServiceId in rovi
 
     service = relationship("Service", backref=backref("services", order_by=id))
 
@@ -32,7 +32,7 @@ class User(Base):
 class Show(Base):
     __tablename__ = "shows"
 
-    id = Column(Integer, primary_key= True) #cosmoid in rovi -- 
+    id = Column(Integer, primary_key= True)
     cosmoid = Column(Integer, nullable=True) # rovi
     tvdb_id = Column(Integer, nullable=True) # for future use
     title = Column(String(64)) # title or video if in rovi search
