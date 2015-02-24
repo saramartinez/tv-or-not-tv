@@ -132,14 +132,21 @@ def search_results():
     unix_time = int(time())
 
     sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
-    print sig
 
     api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&size=20&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
     rovi_results = requests.get(api_request).json()
-    print rovi_results['searchResponse']['results'][0]
+    results = rovi_results['searchResponse']['results']
+    for each in results:
+        result_title = each['video']['masterTitle']
+        result_id = each['video']['ids']['cosmoId']
+        existing_show = modelsession.query(Show).filter(Show.cosmoid == result_id).first()
+        if existing_show == None:
+            new_show = Show(title=result_title, cosmoid=result_id)
+            modelsession.add(new_show)
+            modelsession.commit()
     
-    return redirect("/")
+    return render_template("search.html", results=results)
     # return render_template("tv_list.html", db_shows=db_results, rovi_shows=rovi_results)
 
 @app.route("/favorites/<int:id>")
