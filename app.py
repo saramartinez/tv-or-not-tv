@@ -117,7 +117,7 @@ def process_login():
 def logout():
     """Remove user.id and logged_in from session"""
     session.pop('logged_in', None)
-    session.pop('id', None)
+    # session.pop('id', None)
     flash("You were logged out.")
     return redirect("/")
 

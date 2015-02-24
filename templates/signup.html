@@ -7,11 +7,14 @@ $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 $(document).ready(function() {
 
 	$("#get-service").click( 
-		// function to check length of keypress then once it's greater than 5, call this function	
+		// function to check length of keypress then once it's greater than 5, call this function
+
 		function(e) {
 		var url = "/find-provider?zipcode=" + $("#zipcode-field").val();
+
 		$.get(url,
 			function(result) {
+				$("#service-options").empty();
 				console.log(result.services)
 				$(result.services).each( function() {
 					$("#service-options").append("<li><label><input type='radio' name='service-provider' value='" + this['ServiceId'] + "'>" + this['Name'] + "</label></li>"

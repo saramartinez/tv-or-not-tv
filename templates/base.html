@@ -1,9 +1,10 @@
 <html>
 <head>
     <title>TV...or Not TV</title>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     
 </head>
@@ -11,11 +12,11 @@
     <h1>TV... or Not TV</h1>
 <ul class="nav nav-tabs">
 <li><a href="/">Home</a></li>
-{% if not session['user'] %}
+{% if not session['logged_in'] %}
 <li><a href="/login">Log In</a></li>
 <li><a href="/signup">Sign up</a></li>
 {% endif %}
-{% if session['user'] %}
+{% if session['logged_in'] %}
 <li><a href="/favorites/{{ session['id'] }}">Favorites</a></li>
 <li><a href="/settings/{{ session['id'] }}">Settings</a></li>
 <li><a href="/logout">Log out</a></li>
@@ -37,5 +38,6 @@
 
 {% block body %}
 {% endblock %}
+
 </body>
 </html>
