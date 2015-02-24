@@ -1,31 +1,35 @@
 {% extends 'base.html' %}
 {% block body %}
 <script>
-$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-
 
 $(document).ready(function() {
 
-	$("#get-service").click( 
-		// function to check length of keypress then once it's greater than 5, call this function
+	$("#zipcode-field").keyup( 
 
-		function(e) {
-		var url = "/find-provider?zipcode=" + $("#zipcode-field").val();
+	function(e) {
+	var len = $("#zipcode-field").val().length;
+
+	if (len>4) {
+	var url = "/find-provider?zipcode=" + $("#zipcode-field").val();
 
 		$.get(url,
 			function(result) {
+
 				$("#service-options").empty();
-				console.log(result.services)
+
+				$(".show-options").html("Choose your TV service provider:");
+				
 				$(result.services).each( function() {
-					$("#service-options").append("<li><label><input type='radio' name='service-provider' value='" + this['ServiceId'] + "'>" + this['Name'] + "</label></li>"
-						);
-				});
-		});
+					
+					$("#service-options").append("<li><label><input type='radio' name='service-provider' value='" + this['ServiceId'] + "'>" + this['Name'] + "</label></li>"); 
+
+				}); 
+			}); 
+		}
 	});
 });
 
 </script>
-
 
 
 <h2>New users, sign up:</h2>
@@ -34,7 +38,8 @@ $(document).ready(function() {
     <label><input type="username" name="username" placeholder="Name" required autofocus /></label><br>
     <label><input type="email" name="email" placeholder="Email Address" required /></label><br>
     <label><input type="password" name="password" placeholder="Password" required /></label><br>
-    <label><input type="zipcode" id="zipcode-field" name="zipcode" placeholder="Zip Code" required /></label><br><button id="get-service" type="button">Find service provider</button>
+    <label><input type="zipcode" id="zipcode-field" name="zipcode" placeholder="Zip Code" required /><br>
+    <p class="show-options"></p>
     <ul id="service-options">
     </ul>
 <span id="timezone-input"></span>
@@ -50,11 +55,7 @@ tz.setAttribute('value', timezone);
 
 $("#timezone-input").append(tz);
 </script>
-
-
-
-<br><br><br>
-
+<br>
 
 
     <label><input type="submit" value="Sign Up"></label>
