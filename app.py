@@ -35,12 +35,13 @@ def process_signup():
 
     name = request.form.get("username")
     zipcode = request.form.get("zipcode")
+    service_id = request.form.get("service-provider")
     timezone = request.form.get("timezone")
 
     existing_user = modelsession.query(User).filter(User.email==new_email).first()
     
     if existing_user == None:
-        new_user = User(name=name, email=new_email, password=new_password, zipcode=zipcode, timezone=timezone)
+        new_user = User(name=name, email=new_email, password=new_password, zipcode=zipcode, service_id=service_id, timezone=timezone)
         modelsession.add(new_user)
         modelsession.commit()
         session['user'] = new_user.id
