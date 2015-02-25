@@ -1,22 +1,52 @@
 {% extends 'base.html' %}
 {% block body %}
 {% if results %}
+
 <h2>Search Results</h2>
+
 <h3><em>Choose which show(s) to add to your Favorites:</em></h3>
+
 <form action="/" method="POST">
+
 <ul>
+
 {% for each in results %}
-<li><label><input type="checkbox" name="show" value="{{ each['video']['ids']['cosmoid'] }}">{{ each['video']['masterTitle'] }}</label></li>
+
+<li><label><input type="checkbox" name="show" value="{{ each['video']['ids']['cosmoid'] }}">{{ each['video']['masterTitle'] }}</label> 
+
+{% if each['video']['images'] %}
+
+<p><img style="height:80px;float:left;" src="{{ each['video']['images'][0]['url'] }}" alt="{{ each['video']['masterTitle'] }}"></p>
+
+{% endif %}
+
+{% if each['video']['synopsis'] %}
+
+<p>{{ each['video']['synopsis']['synopsis'] }}</p>
+
+{% endif %}
+
+</li>
+
 {% endfor %}
+
 </ul>
+
 <input type="submit">
+
 </form>
+
 {% else %}
+
 <h2>Search</h2>
+
 <h3>Find TV shows to add to your personalized listings:</h3>
+
 <form action="{{ url_for("search") }}" method="POST">
+
     <input type="text" name="query">
     <input type="submit">
+
 </form>
 
 

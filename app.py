@@ -133,16 +133,23 @@ def search_results():
 
     sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
 
-    api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&size=20&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
+    api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
     rovi_results = requests.get(api_request).json()
     results = rovi_results['searchResponse']['results']
     for each in results:
         result_title = each['video']['masterTitle']
         result_id = each['video']['ids']['cosmoId']
+        
+        if each['video']['synopsis']:
+            result_synopsis = each['video']['synopsis']['synopsis']
+
+        if each['video']['images']:
+            result_img = each['video']['images'][0]['url']
+
         existing_show = modelsession.query(Show).filter(Show.cosmoid == result_id).first()
         if existing_show == None:
-            new_show = Show(title=result_title, cosmoid=result_id)
+            new_show = Show(title=result_title, cosmoid=result_id, synopsis=result_synopsis, img=result_img)
             modelsession.add(new_show)
             modelsession.commit()
     

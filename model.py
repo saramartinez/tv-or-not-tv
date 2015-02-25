@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
 
 ENGINE = create_engine("sqlite:///tv.db", echo=True)
@@ -36,6 +36,8 @@ class Show(Base):
     cosmoid = Column(Integer, nullable=True) # rovi
     tvdb_id = Column(Integer, nullable=True) # for future use
     title = Column(String(64)) # title or video if in rovi search
+    synopsis = Column(Text, nullable=True)
+    img = Column(String(400), nullable=True)
 
     def __repr__(self):
         return "<TV Show: id=%d, title=%s>" % (self.id, self.title)
