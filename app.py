@@ -128,7 +128,7 @@ def search():
 @app.route("/search", methods=["POST"])
 def search_results():
     query = request.form.get('query')
-    # db_results = modelsession.query(Show).filter(Show.title.like("%" + query + "%")).limit(50).all()
+    # db_results = modelsession.query(Show).filter(Show.title.like("%" + query + "%")).limit(10).all()
     unix_time = int(time())
 
     sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
@@ -143,9 +143,13 @@ def search_results():
         
         if each['video']['synopsis']:
             result_synopsis = each['video']['synopsis']['synopsis']
+        else:
+            result_synopsis = None
 
         if each['video']['images']:
             result_img = each['video']['images'][0]['url']
+        else:
+            result_img = None
 
         existing_show = modelsession.query(Show).filter(Show.cosmoid == result_id).first()
         if existing_show == None:
@@ -156,9 +160,23 @@ def search_results():
     return render_template("search.html", results=results)
     # return render_template("tv_list.html", db_shows=db_results, rovi_shows=rovi_results)
 
+@app.route("/favorites", methods=['POST'])
+def add_to_favorites():
+    shows = request.form.getlist("show")
+    for show in shows:
+        existing_favorite = modelsession.query(Favorite).filter(Favorite.show_id == show, Favorite.user_id == session['id']).first()
+        if existing_favorite == None:
+            new_favorite = Favorite(user_id=session['id'], show_id=show)
+            modelsession.add(new_favorite)
+            modelsession.commit()
+        # save to user's db
+
+    return redirect("/")
+
 @app.route("/favorites/<int:id>")
 def show_favorites(id):
-    return render_template("favorites.html", id=id)
+    favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).all()
+    return render_template("favorites.html", id=id, favorites=favorites)
 
 @app.route("/settings/<int:id>")
 def user_settings(id):

@@ -6,17 +6,18 @@
 
 <h3><em>Choose which show(s) to add to your Favorites:</em></h3>
 
-<form action="/" method="POST">
+<form action="/favorites" method="POST">
 
 <ul>
 
 {% for each in results %}
 
-<li><label><input type="checkbox" name="show" value="{{ each['video']['ids']['cosmoid'] }}">{{ each['video']['masterTitle'] }}</label> 
+<li><label><input type="checkbox" name="show" 
+value="{{ each['video']['ids']['cosmoId'] }}">{{ each['video']['masterTitle'] }}</label> 
 
 {% if each['video']['images'] %}
 
-<p><img style="height:80px;float:left;" src="{{ each['video']['images'][0]['url'] }}" alt="{{ each['video']['masterTitle'] }}"></p>
+<p><img style="height:80px;" src="{{ each['video']['images'][0]['url'] }}" alt="{{ each['video']['masterTitle'] }}"></p>
 
 {% endif %}
 

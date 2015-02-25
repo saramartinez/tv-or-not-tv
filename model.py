@@ -40,7 +40,7 @@ class Show(Base):
     img = Column(String(400), nullable=True)
 
     def __repr__(self):
-        return "<TV Show: id=%d, title=%s>" % (self.id, self.title)
+        return "<TV Show: id=%d, title=%s, cosmoid=%s, synopsis=%s, img=%s>" % (self.id, self.title, self.cosmoid, self.synopsis, self.img)
 
 
 class Service(Base):
@@ -57,7 +57,7 @@ class Favorite(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    show_id = Column(Integer, ForeignKey('shows.id'))
+    show_id = Column(Integer, ForeignKey('shows.cosmoid'))
 
     user = relationship("User", backref=backref("users", order_by=id))
     show = relationship("Show", backref=backref("shows"))

@@ -1,4 +1,25 @@
 {% extends 'base.html' %}
 {% block body %}
+
+{% if favorites %}
+
+{% for favorite in favorites %}
+<li>
+{{ favorite.show.title }}
+
+{% if favorite.show.img %}
+<p><img style="height:80px;" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
+{% endif %}
+
+</li>
+{% endfor %}
+
+
+
+
+{% else %}
 Favorites go here
+{% endif %}
+
+
 {% endblock %}
