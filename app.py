@@ -18,6 +18,10 @@ ROVI_SEARCH_SECRET_KEY = os.environ['ROVI_METADATA_SHARED_SECRET']
 @app.route("/")
 def index():
     """Shows the index."""
+    if 'logged_in' in session:
+        favorites = modelsession.query(Favorite).filter(Favorite.user_id==session['id']).all()
+        return render_template("favorites.html", favorites=favorites, id=session['id'])
+
     return render_template("index.html")
 
 @app.route("/signup", methods=['GET'])
@@ -176,6 +180,10 @@ def add_to_favorites():
 @app.route("/favorites/<int:id>")
 def show_favorites(id):
     favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).all()
+
+    # for favorite in favorites
+        # api query for each favorite's schedule
+
     return render_template("favorites.html", id=id, favorites=favorites)
 
 @app.route("/settings/<int:id>")
