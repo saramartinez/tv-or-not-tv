@@ -11,12 +11,32 @@
 <p><img style="height:80px;" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
 {% endif %}
 
+{% if schedule %}
+Schedule: 
+<ul>
+{% for item in schedule %}
+<li>
+Channel {{ item['Channel'] }} ({{ item['SourceLongName'] }}) at {{ item['AiringTime'] }}
 
+{% if item['Copy'] %}
+<p><strong>Description:</strong> {{ item['Copy'] }}</p>
+{% endif  %}
+</li>
+
+
+{% endfor %}
+</ul>
+{% else %}
+No showtimes in the next week.
+{% endif %}
+
+
+</ul>
 
 </li>
 {% endfor %}
-</ul>
 
+</ul>
 
 
 {% else %}

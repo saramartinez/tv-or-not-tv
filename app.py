@@ -7,13 +7,17 @@ import os
 import requests
 import json
 import hashlib
-from time import time
+from time import time, strftime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'comingsoon'
 ROVI_LISTINGS_API_KEY = os.environ['ROVI_TV_LISTINGS_API_KEY']
 ROVI_SEARCH_API_KEY = os.environ['ROVI_METADATA_SEARCH_API_KEY']
-ROVI_SEARCH_SECRET_KEY = os.environ['ROVI_METADATA_SHARED_SECRET'] 
+ROVI_SEARCH_SECRET_KEY = os.environ['ROVI_METADATA_SHARED_SECRET']
+
+unix_time = int(time())
+sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
 
 @app.route("/")
 def index():
@@ -38,9 +42,14 @@ def find_provider():
     database if not already there; then and return to
     signup.html.
     """
-    zipcode = request.args.get("zipcode")
-    providers = requests.get("http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/" + str(zipcode) + "/info?locale=en-US&countrycode=US&format=json&apikey=" + ROVI_LISTINGS_API_KEY).json()
+    zipcode = str(request.args.get("zipcode"))
+
+    listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
+
+    providers = requests.get(listings_request).json() 
+    
     services = providers['ServicesResult']['Services']['Service']
+    
     for each in services:
         existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
         if existing_service == None:
@@ -121,7 +130,7 @@ def process_login():
 def logout():
     """Remove user.id and logged_in from session"""
     session.pop('logged_in', None)
-    # session.pop('id', None)
+    session.pop('id', None)
     flash("You were logged out.")
     return redirect("/")
 
@@ -133,9 +142,7 @@ def search():
 def search_results():
     query = request.form.get('query')
     # db_results = modelsession.query(Show).filter(Show.title.like("%" + query + "%")).limit(10).all()
-    unix_time = int(time())
 
-    sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
 
     api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
@@ -179,12 +186,56 @@ def add_to_favorites():
 
 @app.route("/favorites/<int:id>")
 def show_favorites(id):
-    favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).all()
+    # favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).all()
+    # return render_template("favorites.html", id=id, favorites=favorites)
 
-    # for favorite in favorites
-        # api query for each favorite's schedule
+# @app.route("/schedule")
+# def show_schedule():
+    favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).limit(5)
+    
+    serviceid = modelsession.query(User.service_id).filter(User.id==id).first()[0]
+    
+    start = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    end = (datetime.utcnow() + timedelta(days=5)).strftime("%Y%m%d%H%M%S")
 
-    return render_template("favorites.html", id=id, favorites=favorites)
+    for favorite in favorites:
+        cosmoid = favorite.show_id
+
+        api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&pagesize=0&format=json&apikey=%s" % (serviceid, cosmoid, ROVI_LISTINGS_API_KEY)
+
+        request_results = requests.get(api_request).json()
+        results = request_results['ProgramDetailsResult']['Schedule']['Airings']
+
+        # for each in results:
+        #     title = each['Title']
+        #     if each['Copy']:
+        #         summary = each['Copy']
+        #     if each['AiringTime']:
+        #         air_time = each['AiringTime']
+        #         # must convert string to datetime then display properly
+            
+        #     if each['AiringType'] == "New":
+        #         is_new = True
+            
+        #     if each['HD'] == True:
+        #         is_hd = True
+
+        #     channel = each['Channel']
+        #     channel_name = each['SourceLongName']
+
+    return render_template("schedule.html", schedule=results, favorites=favorites)
+        # return render_template("schedule.html", id=id, favorites=favorites, schedule=results, title=title, summary=summary, air_time=air_time, is_new=is_new, is_hd=is_hd, channel=channel, channel_name=channel_name)
+
+
+
+            # if is_new and is_hd:
+            #     print "A new episode of %s is on Channel %s (%s) in HD at %s. Description: %s" % (title, channel, channel_name, air_time, summary)
+            # elif is_new:
+            #     print "A new episode of %s is on Channel %s (%s) at %s. Description: %s"
+            # elif is_hd:
+            #     print "%s is on Channel %s (%s) in HD at %s. Description: %s"
+            # else:
+            #     print "%s is on Channel %s (%s) at %s. Description: %s"
 
 @app.route("/settings/<int:id>")
 def user_settings(id):
