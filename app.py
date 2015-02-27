@@ -217,14 +217,14 @@ def show_favorites(id):
         request_results = requests.get(api_request).json()
         results = request_results['ProgramDetailsResult']['Schedule']['Airings']
         
-        for each in results:
-            time = each['AiringTime']
-            air_time = datetime.strptime(str(time), '%Y-%m-%dT%H:%M:%SZ')
-            air_time = datetime.strftime(air_time, '%A, %b %d at %H:%M')
-            each['AiringTime'] = air_time
+        # for each in results:
+        #     time = each['AiringTime']
+        #     air_time = datetime.strptime(str(time), '%Y-%m-%dT%H:%M:%SZ')
+        #     # air_time = datetime.strftime(air_time, '%A, %b %d at %H:%M')
+        #     each['AiringTime'] = air_time
 
-            print each['AiringTime']
-            print type(each['AiringTime'])
+        #     print each['AiringTime']
+        #     print type(each['AiringTime'])
 
         results_list.append(results)
 

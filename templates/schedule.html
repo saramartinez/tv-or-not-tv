@@ -18,7 +18,21 @@
 				{% for item in schedule[loop.index-1] %}
 
 				<li>
-					 <p>{{ item['AiringTime'] }}</p>
+				<script>
+
+				var air_time = moment.utc("{{ item['AiringTime'] }}").local() ;
+				air_time = air_time.format("dddd, MMMM Do [at] LT");
+				var from_now = moment("{{ item['AiringTime'] }}").fromNow();
+
+				console.log(from_now);
+
+				$(document).ready(function() {
+				$(".air_time").html(air_time + " <em>(" + from_now + ")</em>") });
+
+				</script>
+
+
+					 <p class="air_time"></p>
 
 					<p>Channel {{ item['Channel'] }}
 
