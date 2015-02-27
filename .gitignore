@@ -4,3 +4,4 @@ secrets.sh
 examples/
 test.html
 *.db
+/node_modules

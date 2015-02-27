@@ -18,21 +18,24 @@
 				{% for item in schedule[loop.index-1] %}
 
 				<li>
+					 <p>{{ item['AiringTime'] }}</p>
 
-					Channel {{ item['Channel'] }}
+					<p>Channel {{ item['Channel'] }}
 
 					{% if item['HD'] %}
 						<strong>in HD</strong>
 					{% endif %}
 
 
-					 ({{ item['SourceLongName'] }}) at {{ item['AiringTime'] }}
+					 ({{ item['SourceLongName'] }})
+
 
 					{% if item['AiringType']=='New' %}
 						<strong><em>(NEW EPISODE)</em></strong>
 					{% else %}
 						<em>(Repeat)</em>
 					{% endif %}
+					</p>
 
 					{% if item['Copy'] %}
 						<p><strong>Description:</strong> {{ item['Copy'] }}</p>
