@@ -146,7 +146,11 @@ def search_results():
 
     api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
+    # try except for value error if no results returned
+
     rovi_results = requests.get(api_request).json()
+
+
     results = rovi_results['searchResponse']['results']
     for each in results:
         result_title = each['video']['masterTitle']
@@ -198,6 +202,8 @@ def show_favorites(id):
     start = datetime.utcnow().strftime("%Y%m%d%H%M%S")
     end = (datetime.utcnow() + timedelta(days=5)).strftime("%Y%m%d%H%M%S")
 
+    results_list = []
+
     for favorite in favorites:
         cosmoid = favorite.show_id
 
@@ -205,27 +211,9 @@ def show_favorites(id):
 
         request_results = requests.get(api_request).json()
         results = request_results['ProgramDetailsResult']['Schedule']['Airings']
+        results_list.append(results)
 
-        # for each in results:
-        #     title = each['Title']
-        #     if each['Copy']:
-        #         summary = each['Copy']
-        #     if each['AiringTime']:
-        #         air_time = each['AiringTime']
-        #         # must convert string to datetime then display properly
-            
-        #     if each['AiringType'] == "New":
-        #         is_new = True
-            
-        #     if each['HD'] == True:
-        #         is_hd = True
-
-        #     channel = each['Channel']
-        #     channel_name = each['SourceLongName']
-
-    return render_template("schedule.html", schedule=results, favorites=favorites)
-        # return render_template("schedule.html", id=id, favorites=favorites, schedule=results, title=title, summary=summary, air_time=air_time, is_new=is_new, is_hd=is_hd, channel=channel, channel_name=channel_name)
-
+    return render_template("schedule.html", schedule=results_list, favorites=favorites)
 
 
             # if is_new and is_hd:

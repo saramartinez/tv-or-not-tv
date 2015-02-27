@@ -10,11 +10,10 @@
 {% if favorite.show.img %}
 <p><img style="height:80px;" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
 {% endif %}
-
 {% if schedule %}
-Schedule: 
+<p>Schedule:</p> 
 <ul>
-{% for item in schedule %}
+{% for item in schedule[loop.index-1] %}
 <li>
 Channel {{ item['Channel'] }} ({{ item['SourceLongName'] }}) at {{ item['AiringTime'] }}
 
