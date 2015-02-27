@@ -22,42 +22,12 @@ sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time))
 @app.route("/")
 def index():
     """Shows the index."""
-    if 'logged_in' in session:
-        favorites = modelsession.query(Favorite).filter(Favorite.user_id==session['id']).all()
-        return render_template("favorites.html", favorites=favorites, id=session['id'])
-
     return render_template("index.html")
 
 @app.route("/signup", methods=['GET'])
 def show_signup():
     """Display registration form"""
     return render_template("signup.html")
-
-@app.route("/find-provider", methods=['GET'])
-def find_provider():
-    """
-    AJAX request sends user zipcode from signup.html to
-    query Rovi TV Listings API for possible service 
-    providers during user signup and add provider to
-    database if not already there; then and return to
-    signup.html.
-    """
-    zipcode = str(request.args.get("zipcode"))
-
-    listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
-
-    providers = requests.get(listings_request).json() 
-    
-    services = providers['ServicesResult']['Services']['Service']
-    
-    for each in services:
-        existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
-        if existing_service == None:
-            new_service = Service(name=each['Name'], id=each['ServiceId'])
-            modelsession.add(new_service)
-            modelsession.commit()
-    return jsonify({'services': services})
-
 
 @app.route("/signup", methods=['GET', 'POST'])
 def process_signup():
@@ -90,6 +60,31 @@ def process_signup():
         flash("Your email address is already associated with an account. Please log in.")
         return redirect("/login")
 
+@app.route("/find-provider", methods=['GET'])
+def find_provider():
+    """
+    AJAX request sends user zipcode from signup.html to
+    query Rovi TV Listings API for possible service 
+    providers during user signup and add provider to
+    database if not already there; then and return to
+    signup.html.
+    """
+    zipcode = str(request.args.get("zipcode"))
+
+    listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
+
+    providers = requests.get(listings_request).json() 
+    
+    services = providers['ServicesResult']['Services']['Service']
+    
+    for each in services:
+        existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
+        if existing_service == None:
+            new_service = Service(name=each['Name'], id=each['ServiceId'])
+            modelsession.add(new_service)
+            modelsession.commit()
+    return jsonify({'services': services})
+
 @app.route("/login", methods=['GET'])
 def show_login():
     """Show login form only if user not logged in"""
@@ -99,7 +94,6 @@ def show_login():
         flash("You're already logged in!")
         return redirect('/') 
 
-# Allow existing users to log in
 @app.route("/login", methods=['POST'])
 def process_login():
     """
@@ -134,6 +128,11 @@ def logout():
     flash("You were logged out.")
     return redirect("/")
 
+@app.route("/settings/<int:id>")
+def user_settings(id):
+    user_profile = modelsession.query(User).filter(User.id == id).one()
+    return render_template("settings.html", id=id, user=user_profile)
+
 @app.route("/search")
 def search():
     return render_template("search.html")
@@ -142,7 +141,6 @@ def search():
 def search_results():
     query = request.form.get('query')
     # db_results = modelsession.query(Show).filter(Show.title.like("%" + query + "%")).limit(10).all()
-
 
     api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
@@ -195,11 +193,17 @@ def add_to_favorites():
 
 @app.route("/favorites/<int:id>")
 def show_favorites(id):
-    # favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).all()
-    # return render_template("favorites.html", id=id, favorites=favorites)
+    favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).all()
+    return render_template("favorites.html", id=id, favorites=favorites)
 
-# @app.route("/schedule")
-# def show_schedule():
+@app.route("/schedule/<int:id>")
+def show_schedule(id):
+    """
+    Gets user's first five favorites from database, then
+    determine's user's service_id, current datetime and
+    5 days from now to build API query. Results with
+    broadcast times append to list to be returned to HTML. 
+    """
     favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).limit(5)
     
     serviceid = modelsession.query(User.service_id).filter(User.id==id).first()[0]
@@ -216,26 +220,10 @@ def show_favorites(id):
 
         request_results = requests.get(api_request).json()
         results = request_results['ProgramDetailsResult']['Schedule']['Airings']
-        
-        # for each in results:
-        #     time = each['AiringTime']
-        #     air_time = datetime.strptime(str(time), '%Y-%m-%dT%H:%M:%SZ')
-        #     # air_time = datetime.strftime(air_time, '%A, %b %d at %H:%M')
-        #     each['AiringTime'] = air_time
-
-        #     print each['AiringTime']
-        #     print type(each['AiringTime'])
 
         results_list.append(results)
 
-
-
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
-
-@app.route("/settings/<int:id>")
-def user_settings(id):
-    user_profile = modelsession.query(User).filter(User.id == id).one()
-    return render_template("settings.html", id=id, user=user_profile)
 
 
 if __name__ == "__main__":

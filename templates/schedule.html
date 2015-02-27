@@ -24,8 +24,6 @@
 				air_time = air_time.format("dddd, MMMM Do [at] LT");
 				var from_now = moment("{{ item['AiringTime'] }}").fromNow();
 
-				console.log(from_now);
-
 				$(document).ready(function() {
 				$(".air_time").html(air_time + " <em>(" + from_now + ")</em>") });
 
