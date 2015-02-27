@@ -93,7 +93,7 @@ def process_signup():
 @app.route("/login", methods=['GET'])
 def show_login():
     """Show login form only if user not logged in"""
-    if "user" not in session:
+    if "logged_in" not in session:
         return render_template("login.html")
     else:
         flash("You're already logged in!")
@@ -149,7 +149,7 @@ def search_results():
     # try except for value error if no results returned
 
     rovi_results = requests.get(api_request).json()
-
+#or get response, cq if valid then move forward
 
     results = rovi_results['searchResponse']['results']
     for each in results:
@@ -217,6 +217,8 @@ def show_favorites(id):
         request_results = requests.get(api_request).json()
         results = request_results['ProgramDetailsResult']['Schedule']['Airings']
         results_list.append(results)
+
+
 
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
 
