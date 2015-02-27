@@ -2,38 +2,39 @@
 {% block body %}
 
 {% if favorites %}
-<ul>
-{% for favorite in favorites %}
-<li>
-{{ favorite.show.title }}
+	<ul>
+	{% for favorite in favorites %}
+		<li>
+		{{ favorite.show.title }}
 
-{% if favorite.show.img %}
-<p><img style="height:80px;" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
-{% endif %}
-{% if schedule %}
-<p>Schedule:</p> 
-<ul>
-{% for item in schedule[loop.index-1] %}
-<li>
-Channel {{ item['Channel'] }} ({{ item['SourceLongName'] }}) at {{ item['AiringTime'] }}
-
-{% if item['Copy'] %}
-<p><strong>Description:</strong> {{ item['Copy'] }}</p>
-{% endif  %}
-</li>
+		{% if favorite.show.img %}
+			<p><img style="height:80px;" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
+		{% endif %}
 
 
-{% endfor %}
-</ul>
-{% else %}
-No showtimes in the next week.
-{% endif %}
+		{% if schedule[loop.index-1] %}
+			<p>Schedule:</p> 
+			<ul>
+				{% for item in schedule[loop.index-1] %}
 
+				<li>
+					Channel {{ item['Channel'] }} ({{ item['SourceLongName'] }}) at {{ item['AiringTime'] }}
 
-</ul>
+					{% if item['Copy'] %}
+						<p><strong>Description:</strong> {{ item['Copy'] }}</p>
+					{% endif %}
+				</li>
 
-</li>
-{% endfor %}
+				{% endfor %}
+			</ul>
+		{% else %}
+			<ul><li>
+				No showtimes in the next week.
+			</li></ul>
+		{% endif %}
+
+		</li>
+	{% endfor %}
 
 </ul>
 
