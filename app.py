@@ -177,6 +177,11 @@ def search_results():
 
 @app.route("/favorites", methods=['POST'])
 def add_to_favorites():
+    """
+    Saves new database entry in favorites table with
+    user's ID and show ID (foreign keys bridge users
+    table and shows table).
+    """
     shows = request.form.getlist("show")
     for show in shows:
         existing_favorite = modelsession.query(Favorite).filter(Favorite.show_id == show, Favorite.user_id == session['id']).first()
@@ -214,16 +219,6 @@ def show_favorites(id):
         results_list.append(results)
 
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
-
-
-            # if is_new and is_hd:
-            #     print "A new episode of %s is on Channel %s (%s) in HD at %s. Description: %s" % (title, channel, channel_name, air_time, summary)
-            # elif is_new:
-            #     print "A new episode of %s is on Channel %s (%s) at %s. Description: %s"
-            # elif is_hd:
-            #     print "%s is on Channel %s (%s) in HD at %s. Description: %s"
-            # else:
-            #     print "%s is on Channel %s (%s) at %s. Description: %s"
 
 @app.route("/settings/<int:id>")
 def user_settings(id):
