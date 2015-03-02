@@ -144,31 +144,35 @@ def search_results():
 
     api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
-    # try except for value error if no results returned
+    rovi_results = requests.get(api_request)
 
-    rovi_results = requests.get(api_request).json()
-#or get response, cq if valid then move forward
+    if rovi_results:
+        json_results = rovi_results.json()
 
-    results = rovi_results['searchResponse']['results']
-    for each in results:
-        result_title = each['video']['masterTitle']
-        result_id = each['video']['ids']['cosmoId']
-        
-        if each['video']['synopsis']:
-            result_synopsis = each['video']['synopsis']['synopsis']
-        else:
-            result_synopsis = None
+        results = json_results['searchResponse']['results']
+        for each in results:
+            result_title = each['video']['masterTitle']
+            result_id = each['video']['ids']['cosmoId']
+            
+            if each['video']['synopsis']:
+                result_synopsis = each['video']['synopsis']['synopsis']
+            else:
+                result_synopsis = None
 
-        if each['video']['images']:
-            result_img = each['video']['images'][0]['url']
-        else:
-            result_img = None
+            if each['video']['images']:
+                result_img = each['video']['images'][0]['url']
+            else:
+                result_img = None
 
-        existing_show = modelsession.query(Show).filter(Show.cosmoid == result_id).first()
-        if existing_show == None:
-            new_show = Show(title=result_title, cosmoid=result_id, synopsis=result_synopsis, img=result_img)
-            modelsession.add(new_show)
-            modelsession.commit()
+            existing_show = modelsession.query(Show).filter(Show.cosmoid == result_id).first()
+            if existing_show == None:
+                new_show = Show(title=result_title, cosmoid=result_id, synopsis=result_synopsis, img=result_img)
+                modelsession.add(new_show)
+                modelsession.commit()
+
+    else:
+        results = None
+        flash("No results; please search again.")
     
     return render_template("search.html", results=results)
     # return render_template("tv_list.html", db_shows=db_results, rovi_shows=rovi_results)
