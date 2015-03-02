@@ -19,7 +19,7 @@
 {% endif %}
 {% if session['logged_in'] %}
 <li><a href="/favorites/{{ session['id'] }}">Favorites</a></li>
-<li><a href="/schedule/{{ session['id'] }}">What's on?</a></li>
+<li><a href="/schedule/{{ session['id'] }}">TV Listings</a></li>
 <li><a href="/settings/{{ session['id'] }}">Settings</a></li>
 <li><a href="/logout">Log out</a></li>
 {% endif %}
