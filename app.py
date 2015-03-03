@@ -144,11 +144,14 @@ def search_results():
 
     api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
+
     rovi_results = requests.get(api_request)
 
-    if rovi_results:
-        json_results = rovi_results.json()
+    print api_request
+    print requests.get(api_request)
 
+    if rovi_results.status_code == 200:
+        json_results = rovi_results.json()
         results = json_results['searchResponse']['results']
         for each in results:
             result_title = each['video']['masterTitle']
@@ -172,7 +175,7 @@ def search_results():
 
     else:
         results = None
-        flash("No results; please search again.")
+        flash("There was an issue getting results. Please search again.")
     
     return render_template("search.html", results=results)
     # return render_template("tv_list.html", db_shows=db_results, rovi_shows=rovi_results)
@@ -211,21 +214,25 @@ def show_schedule(id):
     favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).limit(5)
     
     serviceid = modelsession.query(User.service_id).filter(User.id==id).first()[0]
-    
-    start = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    end = (datetime.utcnow() + timedelta(days=5)).strftime("%Y%m%d%H%M%S")
+
+    now = datetime.utcnow()
+    # start = now.strftime("%Y%m%d%H%M%S")
+    # end = (now + timedelta(days=5)).strftime("%Y%m%d%H%M%S")
+    start = now.strftime("%Y-%m-%dT%H%%3A%M%%3A%S.%fZ")
 
     results_list = []
 
     for favorite in favorites:
         cosmoid = favorite.show_id
 
-        api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&pagesize=0&format=json&apikey=%s" % (serviceid, cosmoid, ROVI_LISTINGS_API_KEY)
+        api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
         request_results = requests.get(api_request).json()
         results = request_results['ProgramDetailsResult']['Schedule']['Airings']
 
         results_list.append(results)
+
+    results.sort()
 
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
 
