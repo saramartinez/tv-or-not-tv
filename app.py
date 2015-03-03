@@ -133,6 +133,11 @@ def user_settings(id):
     user_profile = modelsession.query(User).filter(User.id == id).one()
     return render_template("settings.html", id=id, user=user_profile)
 
+@app.route("/settings/<int:id>/edit")
+def edit_settings(id):
+    user_profile = modelsession.query(User).filter(User.id == id).one()
+    return render_template("settings.html", id=id, user=user_profile)
+
 @app.route("/search")
 def search():
     return render_template("search.html")
@@ -194,13 +199,18 @@ def add_to_favorites():
             new_favorite = Favorite(user_id=session['id'], show_id=show)
             modelsession.add(new_favorite)
             modelsession.commit()
-        # save to user's db
 
     return redirect("/")
 
 @app.route("/favorites/<int:id>")
 def show_favorites(id):
+    """
+    Queries favorites table with user's ID to determine
+    which shows are saved as favorites, then passes
+    to HTMl to display all.
+    """
     favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).all()
+    favorite = favorites.sort()
     return render_template("favorites.html", id=id, favorites=favorites)
 
 @app.route("/schedule/<int:id>")
@@ -212,6 +222,7 @@ def show_schedule(id):
     broadcast times append to list to be returned to HTML. 
     """
     favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).limit(5)
+    favorites = sorted(favorites)
     
     serviceid = modelsession.query(User.service_id).filter(User.id==id).first()[0]
 

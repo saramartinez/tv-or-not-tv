@@ -36,36 +36,36 @@
 			});
 
 				</script>
+<p>
+					<span class="{{ item['ProgramId'] }}"></span><br>
+	
+						<strong>Channel:</strong> {{ item['Channel'] }}
 
+						{% if item['HD'] %}
+							<strong>in HD</strong>
+						{% endif %}
 
-					 <p class="{{ item['ProgramId'] }}"></p>
+						({{ item['SourceLongName'] }})
 
-					<p><strong>Channel:</strong> {{ item['Channel'] }}
-
-					{% if item['HD'] %}
-						<strong>in HD</strong>
+						{% if item['AiringType']=='New' %}
+							<strong><em>(NEW EPISODE)</em></strong>
+						{% else %}
+							<em>(Repeat)</em>
+						{% endif %}
+					<br>
+					
+					{% if item['Copy'] %}
+						<strong>Synopsis: </strong>
 					{% endif %}
-
-
-					 ({{ item['SourceLongName'] }})
-
-
-					{% if item['AiringType']=='New' %}
-						<strong><em>(NEW EPISODE)</em></strong>
-					{% else %}
-						<em>(Repeat)</em>
-					{% endif %}
-					</p>
-
 
 					{% if item['EpisodeTitle'] %}
-						<p><strong>Episode Title:</strong> {{ item['EpisodeTitle'] }}</p>
+						<em>"{{ item['EpisodeTitle'] }}" —</em>
 					{% endif %}
-
 
 					{% if item['Copy'] %}
-						<p><strong>Description:</strong> {{ item['Copy'] }}</p>
+						{{ item['Copy'] }}
 					{% endif %}
+					</p>
 				</li>
 
 				{% endfor %}

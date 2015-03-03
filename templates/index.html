@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block body %}
-
-Search for shows to add to your favorites, then see when they'll be on TV next.
+{% if session['logged_in'] %}
+View your <a href="/favorites/{{ session['id'] }}">favorites</a>, then see <a href="/schedule/{{ session['id'] }}">when they'll be on TV</a> next.
+{% else %}
+Please sign up to use TV or Not TV.
+{% endif %}
 
 {% endblock %}
