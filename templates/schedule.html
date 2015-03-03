@@ -32,7 +32,7 @@
 
 				var from_now = moment("{{ item['AiringTime'] }}").fromNow();
 
-				$(".{{ item['ProgramId'] }}").html(air_time + " <em>(" + from_now + ")</em>") });
+				$(".{{ item['ProgramId'] }}").html("<strong>When: </strong>" + air_time + " <em>(" + from_now + ")</em>") });
 			});
 
 				</script>
@@ -40,7 +40,7 @@
 
 					 <p class="{{ item['ProgramId'] }}"></p>
 
-					<p>Channel {{ item['Channel'] }}
+					<p><strong>Channel:</strong> {{ item['Channel'] }}
 
 					{% if item['HD'] %}
 						<strong>in HD</strong>
@@ -56,6 +56,12 @@
 						<em>(Repeat)</em>
 					{% endif %}
 					</p>
+
+
+					{% if item['EpisodeTitle'] %}
+						<p><strong>Episode Title:</strong> {{ item['EpisodeTitle'] }}</p>
+					{% endif %}
+
 
 					{% if item['Copy'] %}
 						<p><strong>Description:</strong> {{ item['Copy'] }}</p>
