@@ -73,16 +73,23 @@ def find_provider():
 
     listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
 
-    providers = requests.get(listings_request).json() 
+    listings_results = requests.get(listings_request)
     
-    services = providers['ServicesResult']['Services']['Service']
-    
-    for each in services:
-        existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
-        if existing_service == None:
-            new_service = Service(name=each['Name'], id=each['ServiceId'])
-            modelsession.add(new_service)
-            modelsession.commit()
+    if listings_results.status_code == 200:
+        providers = listings_results.json()
+
+        services = providers['ServicesResult']['Services']['Service']
+        
+        for each in services:
+            existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
+            if existing_service == None:
+                new_service = Service(name=each['Name'], id=each['ServiceId'])
+                modelsession.add(new_service)
+                modelsession.commit()
+    else:
+        services = None
+        flash("There was an issue getting listings. Please reload the page.")
+
     return jsonify({'services': services})
 
 @app.route("/login", methods=['GET'])
@@ -149,11 +156,7 @@ def search_results():
 
     api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
-
     rovi_results = requests.get(api_request)
-
-    print api_request
-    print requests.get(api_request)
 
     if rovi_results.status_code == 200:
         json_results = rovi_results.json()
@@ -180,7 +183,7 @@ def search_results():
 
     else:
         results = None
-        flash("There was an issue getting results. Please search again.")
+        flash("There was an issue getting results. Please search again or reload the page.")
     
     return render_template("search.html", results=results)
     # return render_template("tv_list.html", db_shows=db_results, rovi_shows=rovi_results)
