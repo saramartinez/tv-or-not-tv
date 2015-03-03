@@ -32,8 +32,11 @@ value="{{ each['video']['ids']['cosmoId'] }}">{{ each['video']['masterTitle'] }}
 {% endfor %}
 
 </ul>
-
-<input type="submit">
+{% if session['logged_in'] %}
+<input type="submit" value="Add to Favorites">
+{% else %}
+Please <a href="/login">log in</a> or <a href="/signup">sign up</a> to save favorites.
+{% endif %}
 
 </form>
 
