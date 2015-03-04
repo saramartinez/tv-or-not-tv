@@ -145,8 +145,38 @@ def edit_settings(id):
     user_profile = modelsession.query(User).filter(User.id == id).one()
     return render_template("edit-settings.html", id=id, user=user_profile)
 
+@app.route("/settings/<int:id>/update", methods=["POST"])
 def update_settings(id):
-    pass
+    user_profile = modelsession.query(User).filter(User.id == id).one()
+
+    old_password = request.form.get("old-password")
+    new_email = request.form.get("email", None)
+    new_password = request.form.get("new-password", None)
+    new_name = request.form.get("username", None)
+    new_zipcode = request.form.get("zipcode", None)
+    new_service_id = request.form.get("service-provider", None)
+
+    if old_password == user_profile.password:
+        if new_email:
+            user_profile.email = new_email
+        if new_password:
+            user_profile.password = new_password
+        if new_name:
+            user_profile.name = new_name
+        if new_zipcode:
+            user_profile.zipcode = new_zipcode
+        if new_service_id:
+            user_profile.service_id = new_service_id
+
+        modelsession.commit()
+        modelsession.refresh(user_profile)
+        
+        flash("Profile updated successfully.")
+
+    else:
+        flash("Incorrect password, please try again.")
+
+    return redirect("/settings/" + str(id))
 
 @app.route("/search")
 def search():

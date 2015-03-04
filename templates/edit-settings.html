@@ -38,11 +38,11 @@ $(document).ready(function() {
 </script>
 
 <form id="update-settings" action="/settings/{{ user.id }}/update") method="POST">
-    <p><label>Name: <input type="username" name="username" placeholder="{{ user.name }}" autofocus /></label></p>
+    <p><label>Name: <input type="name" name="username" placeholder="{{ user.name }}" autofocus /></label></p>
     <p><label>Email: <input type="email" name="email" placeholder="{{ user.email }}" /></label></p>
-    <p><label>Old Password: <input type="password" name="password" placeholder="Password" required /></label></p>
-    <p><label>New Password: <input type="password" name="password" placeholder="Optional" /></label></p>
-    <p><label>Zip Code: <input type="zipcode" id="zipcode-field" name="zipcode" placeholder="{{ user.zipcode}}" required /></label></p>
+    <p><label>Old Password: <input type="password" name="old-password" placeholder="Required" required /></label></p>
+    <p><label>New Password: <input type="password" name="new-password" placeholder="Optional" /></label></p>
+    <p><label>Zip Code: <input type="zipcode" id="zipcode-field" name="zipcode" placeholder="{{ user.zipcode}}" /></label></p>
     <p><strong>Service Provider:</strong> {{ user.service.name }} <em>(Enter zip code to look for another provider)</em></p>
     <p class="change-service">
     	<button id='change-service' type='button'>Change Service Provider</button>
@@ -51,5 +51,5 @@ $(document).ready(function() {
     <ul id="service-options">
     </ul>
 
-<p><button id="update-profile" type="button">Update Profile</button></p>
+<p><button id="update-profile" type="submit">Update Profile</button></p>
 </form>
