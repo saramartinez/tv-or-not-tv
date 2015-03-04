@@ -143,7 +143,10 @@ def user_settings(id):
 @app.route("/settings/<int:id>/edit")
 def edit_settings(id):
     user_profile = modelsession.query(User).filter(User.id == id).one()
-    return render_template("settings.html", id=id, user=user_profile)
+    return render_template("edit-settings.html", id=id, user=user_profile)
+
+def update_settings(id):
+    pass
 
 @app.route("/search")
 def search():

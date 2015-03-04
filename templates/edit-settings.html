@@ -1,0 +1,55 @@
+<script>
+$(document).ready(function() {
+
+	$(".change-service").hide();
+
+	$("#zipcode-field").keyup( 
+
+	function(e) {
+	var len = $("#zipcode-field").val().length;
+	if (len>4) {
+		$(".change-service").show()};
+	});
+
+
+
+	$("#change-service").click( 
+	function(e) {	
+
+	var url = "/find-provider?zipcode=" + $("#zipcode-field").val();
+
+		$.get(url,
+			function(result) {
+
+				$("#service-options").empty();
+
+				$(".show-options").html("Choose your TV service provider:");
+				
+				$(result.services).each( function() {
+					
+					$("#service-options").append("<li><label><input type='radio' name='service-provider' value='" + this['ServiceId'] + "'>" + this['Name'] + "</label></li>"); 
+
+				}); 
+			}); 
+
+	});
+});
+
+</script>
+
+<form id="update-settings" action="/settings/{{ user.id }}/update") method="POST">
+    <p><label>Name: <input type="username" name="username" placeholder="{{ user.name }}" autofocus /></label></p>
+    <p><label>Email: <input type="email" name="email" placeholder="{{ user.email }}" /></label></p>
+    <p><label>Old Password: <input type="password" name="password" placeholder="Password" required /></label></p>
+    <p><label>New Password: <input type="password" name="password" placeholder="Optional" /></label></p>
+    <p><label>Zip Code: <input type="zipcode" id="zipcode-field" name="zipcode" placeholder="{{ user.zipcode}}" required /></label></p>
+    <p><strong>Service Provider:</strong> {{ user.service.name }} <em>(Enter zip code to look for another provider)</em></p>
+    <p class="change-service">
+    	<button id='change-service' type='button'>Change Service Provider</button>
+    </p>
+    <p class="show-options"></p>
+    <ul id="service-options">
+    </ul>
+
+<p><button id="update-profile" type="button">Update Profile</button></p>
+</form>
