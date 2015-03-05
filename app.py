@@ -274,12 +274,20 @@ def show_schedule(id):
 
         api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
-        request_results = requests.get(api_request).json()
-        results = request_results['ProgramDetailsResult']['Schedule']['Airings']
+        rovi_results = requests.get(api_request)
 
-        results_list.append(results)
+        if rovi_results.status_code == 200:
 
-    results.sort()
+            request_results = rovi_results.json()
+            results = request_results['ProgramDetailsResult']['Schedule']['Airings']
+
+            results = sorted(results, key=lambda results: results['AiringTime'])
+
+            results_list.append(results)
+        else:
+            flash("The request timed out. Please refresh the page.")
+            results_list = None
+
 
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
 
