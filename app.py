@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, request, session, flash, url_for, jsonify
 from model import session as modelsession
-from model import User, Show, Service, Favorite
+from model import User, Show, Service, Favorite, CachedService, CachedListing, CachedSearch
 from string import ascii_lowercase
 import sys
 import os
@@ -71,26 +71,33 @@ def find_provider():
     """
     zipcode = str(request.args.get("zipcode"))
 
+    now = datetime.now()
+
     ## look for zip param in table, if req relatively fresh, return cached json from table; otherwise below
+    cached_service = modelsession.query(CachedService).filter(CachedService.zipcode_parameter == zipcode).first()
 
-    listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
-
-    listings_results = requests.get(listings_request)
-
-    if listings_results.status_code == 200:
-        providers = listings_results.json()
-
-        services = providers['ServicesResult']['Services']['Service']
-        
-        for each in services:
-            existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
-            if existing_service == None:
-                new_service = Service(name=each['Name'], id=each['ServiceId'])
-                modelsession.add(new_service)
-                modelsession.commit()
+    if cached_service:
+        services = json.loads(cached_service.results)
     else:
-        services = None
-        flash("There was an issue getting listings. Please reload the page.")
+        listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
+
+        listings_results = requests.get(listings_request)
+
+        if listings_results.status_code == 200:
+            providers = listings_results.json()
+
+            services = providers['ServicesResult']['Services']['Service']
+            
+            store_results = CachedService(zipcode_parameter=zipcode, timestamp=now, results=json.dumps(services))
+            modelsession.add(store_results)
+            modelsession.commit()
+
+    for each in services:
+        existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
+        if existing_service == None:
+            new_service = Service(name=each['Name'], id=each['ServiceId'])
+            modelsession.add(new_service)
+            modelsession.commit()
 
     return jsonify({'services': services})
 

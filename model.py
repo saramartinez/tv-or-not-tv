@@ -86,7 +86,7 @@ class CachedListing(Base):
     id = Column(Integer, primary_key=True)
     service_id = Column(Integer, nullable=True)
     show_id = Column(Integer, nullable=True)
-    timestamp = Column(DateTime, nullable=True)
+    timestamp = Column(DateTime)
     results = Column(Text, nullable=True)
 
     def __repr__(self):
