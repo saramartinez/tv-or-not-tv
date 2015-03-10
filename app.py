@@ -76,7 +76,7 @@ def find_provider():
     ## look for zip param in table, if req relatively fresh, return cached json from table; otherwise below
     cached_service = modelsession.query(CachedService).filter(CachedService.zipcode_parameter == zipcode).first()
 
-    week_in_seconds = 604802
+    week_in_seconds = 604800
 
     if cached_service:
         cached_timestamp = mktime((cached_service.timestamp).timetuple())
@@ -204,7 +204,7 @@ def search_results():
 
     cached_search = modelsession.query(CachedSearch).filter(CachedSearch.query == query).first()
 
-    week_in_seconds = 604802
+    week_in_seconds = 604800
 
     if cached_search:
         cached_timestamp = mktime((cached_search.timestamp).timetuple())
@@ -297,31 +297,43 @@ def show_schedule(id):
 
     results_list = []
 
+    six_hours = 21600
+
     for favorite in favorites:
         cosmoid = favorite.show_id
 
+        ## first check cached_listings table in database to see if there is a row matching the TV show's ID and service provider's ID
+        cached_listings = modelsession.query(CachedListing).filter(CachedListing.show_id == cosmoid, CachedListing.service_id == serviceid).first()
 
-        ##sted api req check FRESHNESS OF STUFF
+        ## if there is a row in the table, see how fresh it is
+        if cached_listings:
+            cached_timestamp = mktime((cached_listings.timestamp).timetuple())
+            if current_timestamp - cached_timestamp < six_hours:
+                json_results = json.loads(cached_listings.results)
+                results = json_results['ProgramDetailsResult']['Schedule']['Airings']
 
-        ## if now within 24 h of timestamp in table, then send back cached data; if not then update w/ following request
-
-
-        api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
-
-        rovi_results = requests.get(api_request)
-
-        if rovi_results.status_code == 200:
-
-            request_results = rovi_results.json()
-            results = request_results['ProgramDetailsResult']['Schedule']['Airings']
-
-            results = sorted(results, key=lambda results: results['AiringTime'])
-
-            results_list.append(results)
         else:
-            flash("The request timed out. Please refresh the page.")
-            results_list = None
+            api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
+            rovi_results = requests.get(api_request)
+
+            if rovi_results.status_code == 200:
+                json_results = rovi_results.json()
+
+                ## save JSON object to CachedListing
+                store_results = CachedListing(service_id=serviceid, show_id=cosmoid, timestamp=now, results=(json.dumps(json_results)))
+                modelsession.add(store_results)
+                modelsession.commit()
+        
+                results = json_results['ProgramDetailsResult']['Schedule']['Airings']
+
+                results = sorted(results, key=lambda results: results['AiringTime'])
+            else:
+                flash("The request timed out. Please refresh the page.")
+                results = None
+
+        results_list.append(results)
+        
 
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
 
