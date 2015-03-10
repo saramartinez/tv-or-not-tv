@@ -71,10 +71,12 @@ def find_provider():
     """
     zipcode = str(request.args.get("zipcode"))
 
+    ## look for zip param in table, if req relatively fresh, return cached json from table; otherwise below
+
     listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
 
     listings_results = requests.get(listings_request)
-    
+
     if listings_results.status_code == 200:
         providers = listings_results.json()
 
@@ -187,12 +189,19 @@ def search_results():
     query = request.form.get('query')
     # db_results = modelsession.query(Show).filter(Show.title.like("%" + query + "%")).limit(10).all()
 
+## if query exists in cache and timestamp is sort of recent, return results right here
+
     api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
     rovi_results = requests.get(api_request)
 
+    print requests.get(api_request)
+## if 403, wait a second and try again?    
+
     if rovi_results.status_code == 200:
         json_results = rovi_results.json()
+
+        ## if none fixx it
         results = json_results['searchResponse']['results']
         for each in results:
             result_title = each['video']['masterTitle']
@@ -213,6 +222,8 @@ def search_results():
                 new_show = Show(title=result_title, cosmoid=result_id, synopsis=result_synopsis, img=result_img)
                 modelsession.add(new_show)
                 modelsession.commit()
+
+        ## save result to new table
 
     else:
         results = None
@@ -271,6 +282,12 @@ def show_schedule(id):
 
     for favorite in favorites:
         cosmoid = favorite.show_id
+
+
+        ##sted api req check FRESHNESS OF STUFF
+
+        ## if now within 24 h of timestamp in table, then send back cached data; if not then update w/ following request
+
 
         api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
