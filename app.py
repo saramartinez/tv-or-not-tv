@@ -7,7 +7,7 @@ import os
 import requests
 import json
 import hashlib
-from time import time, strftime
+from time import time, strftime, mktime
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -63,21 +63,26 @@ def process_signup():
 @app.route("/find-provider", methods=['GET'])
 def find_provider():
     """
-    AJAX request sends user zipcode from signup.html to
-    query Rovi TV Listings API for possible service 
-    providers during user signup and add provider to
-    database if not already there; then and return to
-    signup.html.
+    AJAX request during user signup sends user zipcode
+    from signup.html to query database for Cached Service
+    results. If no cached data, query Rovi TV Listings
+    API for possible service providers and add provider to
+    database; then return to signup.html.
     """
     zipcode = str(request.args.get("zipcode"))
 
-    now = datetime.now()
+    now = datetime.utcnow()
+    current_timestamp = mktime(now.timetuple())
 
     ## look for zip param in table, if req relatively fresh, return cached json from table; otherwise below
     cached_service = modelsession.query(CachedService).filter(CachedService.zipcode_parameter == zipcode).first()
 
+    week_in_seconds = 604802
+
     if cached_service:
-        services = json.loads(cached_service.results)
+        cached_timestamp = mktime((cached_service.timestamp).timetuple())
+        if current_timestamp - cached_timestamp < 604802: 
+            services = json.loads(cached_service.results)
     else:
         listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
 
@@ -91,6 +96,9 @@ def find_provider():
             store_results = CachedService(zipcode_parameter=zipcode, timestamp=now, results=json.dumps(services))
             modelsession.add(store_results)
             modelsession.commit()
+        else:
+            services = None
+            flash("There was an error retrieving service providers; please try again.")
 
     for each in services:
         existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()

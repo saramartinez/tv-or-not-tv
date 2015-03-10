@@ -11,6 +11,7 @@ session = scoped_session(sessionmaker(bind=ENGINE,
 Base = declarative_base()
 Base.query = session.query_property()
 
+# Base.metadata.create_all(ENGINE)
 
 ### Class declarations 
 
