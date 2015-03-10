@@ -1,14 +1,12 @@
-from flask import Flask, render_template, redirect, request, session, flash, url_for, jsonify
+from flask import Flask, render_template, redirect, request, session, flash, jsonify
 from model import session as modelsession
 from model import User, Show, Service, Favorite, CachedService, CachedListing, CachedSearch
-from string import ascii_lowercase
-import sys
 import os
 import requests
 import json
 import hashlib
-from time import time, strftime, mktime
-from datetime import datetime, timedelta
+from time import time, mktime
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'comingsoon'
@@ -20,6 +18,7 @@ unix_time = int(time())
 sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
 now = datetime.utcnow()
 current_timestamp = mktime(now.timetuple())
+WEEK_IN_SECONDS = 604800
 
 @app.route("/")
 def index():
@@ -48,10 +47,16 @@ def process_signup():
     service_id = request.form.get("service-provider")
     timezone = request.form.get("timezone")
 
-    existing_user = modelsession.query(User).filter(User.email==new_email).first()
-    
+    existing_user = modelsession.query(User).filter(User.email == new_email).first()
+
     if existing_user == None:
-        new_user = User(name=name, email=new_email, password=new_password, zipcode=zipcode, service_id=service_id, timezone=timezone)
+        new_user = User(
+            name=name,
+            email=new_email,
+            password=new_password,
+            zipcode=zipcode,
+            service_id=service_id,
+            timezone=timezone)
         modelsession.add(new_user)
         modelsession.commit()
         session['logged_in'] = True
@@ -73,17 +78,21 @@ def find_provider():
     """
     zipcode = str(request.args.get("zipcode"))
 
-    ## look for zip param in table, if req relatively fresh, return cached json from table; otherwise below
-    cached_service = modelsession.query(CachedService).filter(CachedService.zipcode_parameter == zipcode).first()
-
-    week_in_seconds = 604800
+    ## look for zip param in table
+    ## if request relatively fresh, return cached
+    ## JSON object from table; otherwise hit API
+    cached_service = modelsession.query(CachedService).filter(
+        CachedService.zipcode_parameter == zipcode).first()
 
     if cached_service:
         cached_timestamp = mktime((cached_service.timestamp).timetuple())
-        if current_timestamp - cached_timestamp < 604802: 
+        if current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
             services = json.loads(cached_service.results)
     else:
-        listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
+        listings_request = "http://api.rovicorp.com/TVlistings/\
+        v9/listings/services/postalcode/%s/info?locale=en-\
+        US&countrycode=US&format=json&apikey=%s"\
+        % (zipcode, ROVI_LISTINGS_API_KEY)
 
         listings_results = requests.get(listings_request)
 
@@ -91,8 +100,11 @@ def find_provider():
             providers = listings_results.json()
 
             services = providers['ServicesResult']['Services']['Service']
-            
-            store_results = CachedService(zipcode_parameter=zipcode, timestamp=now, results=json.dumps(services))
+
+            store_results = CachedService(
+                zipcode_parameter=zipcode,
+                timestamp=now,
+                results=json.dumps(services))
             modelsession.add(store_results)
             modelsession.commit()
         else:
@@ -102,7 +114,9 @@ def find_provider():
     for each in services:
         existing_service = modelsession.query(Service).filter(Service.id == each['ServiceId']).first()
         if existing_service == None:
-            new_service = Service(name=each['Name'], id=each['ServiceId'])
+            new_service = Service(
+                name=each['Name'],
+                id=each['ServiceId'])
             modelsession.add(new_service)
             modelsession.commit()
 
@@ -115,7 +129,7 @@ def show_login():
         return render_template("login.html")
     else:
         flash("You're already logged in!")
-        return redirect('/') 
+        return redirect('/')
 
 @app.route("/login", methods=['POST'])
 def process_login():
@@ -128,7 +142,7 @@ def process_login():
     new_email = request.form.get('email')
     new_password = request.form.get('password')
 
-    existing_user = modelsession.query(User).filter(User.email==new_email).first()
+    existing_user = modelsession.query(User).filter(User.email == new_email).first()
 
     if existing_user == None:
         flash("No user with that email exists. Please sign up!")
@@ -153,16 +167,22 @@ def logout():
 
 @app.route("/settings/<int:id>")
 def user_settings(id):
+    """Displays user profile"""
     user_profile = modelsession.query(User).filter(User.id == id).one()
     return render_template("settings.html", id=id, user=user_profile)
 
 @app.route("/settings/<int:id>/edit")
 def edit_settings(id):
+    """Displays template for user to edit profile"""
     user_profile = modelsession.query(User).filter(User.id == id).one()
     return render_template("edit-settings.html", id=id, user=user_profile)
 
 @app.route("/settings/<int:id>/update", methods=["POST"])
 def update_settings(id):
+    """
+    Updates user in database if they enter correct
+    password when editing settings.
+    """
     user_profile = modelsession.query(User).filter(User.id == id).one()
 
     old_password = request.form.get("old-password")
@@ -186,7 +206,7 @@ def update_settings(id):
 
         modelsession.commit()
         modelsession.refresh(user_profile)
-        
+
         flash("Profile updated successfully.")
 
     else:
@@ -196,23 +216,35 @@ def update_settings(id):
 
 @app.route("/search")
 def search():
+    """Shows search template if user goes directly to route"""
     return render_template("search.html")
 
 @app.route("/search", methods=["POST"])
 def search_results():
+    """
+    Based on user input, queries database to see if cached
+    results exist for query string (within the last week).
+    Otherwise, hits API for results and stores show info in
+    shows table and JSON object from search results in
+    cached_results table.
+    """
     query = request.form.get('query')
 
     cached_search = modelsession.query(CachedSearch).filter(CachedSearch.query == query).first()
 
-    week_in_seconds = 604800
-
     if cached_search:
         cached_timestamp = mktime((cached_search.timestamp).timetuple())
-        if current_timestamp - cached_timestamp < 604802: 
+        if current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
             json_results = json.loads(cached_search.results)
             results = json_results['searchResponse']['results']
     else:
-        api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
+        api_request = "http://api.rovicorp.com/search/v2.1\
+        /video/search?entitytype=tvseries&query="
+        + query
+        + "&rep=1&include=synopsis%2Cimages&size=5&offset=0\
+        &language=en&country=US&format=json&apikey="
+        + ROVI_SEARCH_API_KEY\
+        + "&sig=" + sig
 
         rovi_results = requests.get(api_request)
 
@@ -220,7 +252,10 @@ def search_results():
             json_results = rovi_results.json()
 
             ## save result to new table
-            store_results = CachedSearch(query=query, timestamp=now, results=(json.dumps(json_results)))
+            store_results = CachedSearch(
+                query=query,
+                timestamp=now,
+                results=(json.dumps(json_results)))
             modelsession.add(store_results)
             modelsession.commit()
 
@@ -233,7 +268,7 @@ def search_results():
         for each in results:
             result_title = each['video']['masterTitle']
             result_id = each['video']['ids']['cosmoId']
-            
+
             if each['video']['synopsis']:
                 result_synopsis = each['video']['synopsis']['synopsis']
             else:
@@ -246,10 +281,14 @@ def search_results():
 
             existing_show = modelsession.query(Show).filter(Show.cosmoid == result_id).first()
             if existing_show == None:
-                new_show = Show(title=result_title, cosmoid=result_id, synopsis=result_synopsis, img=result_img)
+                new_show = Show(
+                    title=result_title,
+                    cosmoid=result_id,
+                    synopsis=result_synopsis,
+                    img=result_img)
                 modelsession.add(new_show)
                 modelsession.commit()
-    
+
     return render_template("search.html", results=results)
 
 @app.route("/favorites", methods=['POST'])
@@ -263,7 +302,9 @@ def add_to_favorites():
     for show in shows:
         existing_favorite = modelsession.query(Favorite).filter(Favorite.show_id == show, Favorite.user_id == session['id']).first()
         if existing_favorite == None:
-            new_favorite = Favorite(user_id=session['id'], show_id=show)
+            new_favorite = Favorite(
+                user_id=session['id'],
+                show_id=show)
             modelsession.add(new_favorite)
             modelsession.commit()
 
@@ -276,7 +317,7 @@ def show_favorites(id):
     which shows are saved as favorites, then passes
     to HTMl to display all.
     """
-    favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).all()
+    favorites = modelsession.query(Favorite).filter(Favorite.user_id == id).all()
     favorite = favorites.sort()
     return render_template("favorites.html", id=id, favorites=favorites)
 
@@ -286,12 +327,12 @@ def show_schedule(id):
     Gets user's first five favorites from database, then
     determine's user's service_id, current datetime and
     5 days from now to build API query. Results with
-    broadcast times append to list to be returned to HTML. 
+    broadcast times append to list to be returned to HTML.
     """
-    favorites = modelsession.query(Favorite).filter(Favorite.user_id==id).limit(5)
+    favorites = modelsession.query(Favorite).filter(Favorite.user_id == id).limit(5)
     favorites = sorted(favorites)
-    
-    serviceid = modelsession.query(User.service_id).filter(User.id==id).first()[0]
+
+    serviceid = modelsession.query(User.service_id).filter(User.id == id).first()[0]
 
     start = now.strftime("%Y-%m-%dT%H%%3A%M%%3A%S.%fZ")
 
@@ -302,7 +343,9 @@ def show_schedule(id):
     for favorite in favorites:
         cosmoid = favorite.show_id
 
-        ## first check cached_listings table in database to see if there is a row matching the TV show's ID and service provider's ID
+        ## first check cached_listings table in database to
+        ## see if there is a row matching the TV show's ID
+        ## and service provider's ID
         cached_listings = modelsession.query(CachedListing).filter(CachedListing.show_id == cosmoid, CachedListing.service_id == serviceid).first()
 
         ## if there is a row in the table, see how fresh it is
@@ -313,7 +356,12 @@ def show_schedule(id):
                 results = json_results['ProgramDetailsResult']['Schedule']['Airings']
 
         else:
-            api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
+            api_request = "http://api.rovicorp.com/TVlistings/v9/\
+            listings/programdetails/%s/%s/info?locale=en-US&\
+            copytextformat=PlainText&include=Program&\
+            imagecount=5&duration=10080&inprogress=true&\
+            startdate=%s&pagesize=6&format=json\
+            &apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
             rovi_results = requests.get(api_request)
 
@@ -321,10 +369,14 @@ def show_schedule(id):
                 json_results = rovi_results.json()
 
                 ## save JSON object to CachedListing
-                store_results = CachedListing(service_id=serviceid, show_id=cosmoid, timestamp=now, results=(json.dumps(json_results)))
+                store_results = CachedListing(
+                    service_id=serviceid,
+                    show_id=cosmoid,
+                    timestamp=now,
+                    results=(json.dumps(json_results)))
                 modelsession.add(store_results)
                 modelsession.commit()
-        
+
                 results = json_results['ProgramDetailsResult']['Schedule']['Airings']
 
                 results = sorted(results, key=lambda results: results['AiringTime'])
@@ -333,10 +385,9 @@ def show_schedule(id):
                 results = None
 
         results_list.append(results)
-        
 
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
 
 
 if __name__ == "__main__":
-    app.run(debug = True)
+    app.run(debug=True)
