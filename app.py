@@ -18,6 +18,8 @@ ROVI_SEARCH_SECRET_KEY = os.environ['ROVI_METADATA_SHARED_SECRET']
 
 unix_time = int(time())
 sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
+now = datetime.utcnow()
+current_timestamp = mktime(now.timetuple())
 
 @app.route("/")
 def index():
@@ -70,9 +72,6 @@ def find_provider():
     database; then return to signup.html.
     """
     zipcode = str(request.args.get("zipcode"))
-
-    now = datetime.utcnow()
-    current_timestamp = mktime(now.timetuple())
 
     ## look for zip param in table, if req relatively fresh, return cached json from table; otherwise below
     cached_service = modelsession.query(CachedService).filter(CachedService.zipcode_parameter == zipcode).first()
@@ -202,22 +201,35 @@ def search():
 @app.route("/search", methods=["POST"])
 def search_results():
     query = request.form.get('query')
-    # db_results = modelsession.query(Show).filter(Show.title.like("%" + query + "%")).limit(10).all()
 
-## if query exists in cache and timestamp is sort of recent, return results right here
+    cached_search = modelsession.query(CachedSearch).filter(CachedSearch.query == query).first()
 
-    api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
+    week_in_seconds = 604802
 
-    rovi_results = requests.get(api_request)
+    if cached_search:
+        cached_timestamp = mktime((cached_search.timestamp).timetuple())
+        if current_timestamp - cached_timestamp < 604802: 
+            json_results = json.loads(cached_search.results)
+            results = json_results['searchResponse']['results']
+    else:
+        api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
-    print requests.get(api_request)
-## if 403, wait a second and try again?    
+        rovi_results = requests.get(api_request)
 
-    if rovi_results.status_code == 200:
-        json_results = rovi_results.json()
+        if rovi_results.status_code == 200:
+            json_results = rovi_results.json()
 
-        ## if none fixx it
-        results = json_results['searchResponse']['results']
+            ## save result to new table
+            store_results = CachedSearch(query=query, timestamp=now, results=(json.dumps(json_results)))
+            modelsession.add(store_results)
+            modelsession.commit()
+
+            results = json_results['searchResponse']['results']
+        else:
+            results = None
+            flash("There was an issue getting results. Please search again or reload the page.")
+
+    if results:
         for each in results:
             result_title = each['video']['masterTitle']
             result_id = each['video']['ids']['cosmoId']
@@ -237,15 +249,8 @@ def search_results():
                 new_show = Show(title=result_title, cosmoid=result_id, synopsis=result_synopsis, img=result_img)
                 modelsession.add(new_show)
                 modelsession.commit()
-
-        ## save result to new table
-
-    else:
-        results = None
-        flash("There was an issue getting results. Please search again or reload the page.")
     
     return render_template("search.html", results=results)
-    # return render_template("tv_list.html", db_shows=db_results, rovi_shows=rovi_results)
 
 @app.route("/favorites", methods=['POST'])
 def add_to_favorites():
@@ -288,9 +293,6 @@ def show_schedule(id):
     
     serviceid = modelsession.query(User.service_id).filter(User.id==id).first()[0]
 
-    now = datetime.utcnow()
-    # start = now.strftime("%Y%m%d%H%M%S")
-    # end = (now + timedelta(days=5)).strftime("%Y%m%d%H%M%S")
     start = now.strftime("%Y-%m-%dT%H%%3A%M%%3A%S.%fZ")
 
     results_list = []
