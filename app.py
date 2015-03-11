@@ -86,8 +86,8 @@ def find_provider():
 
     if cached_service:
         cached_timestamp = mktime((cached_service.timestamp).timetuple())
-        if current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
-            services = json.loads(cached_service.results)
+    if cached_service and current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
+        services = json.loads(cached_service.results)
     else:
         listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
 
@@ -235,9 +235,10 @@ def search_results():
 
     if cached_search:
         cached_timestamp = mktime((cached_search.timestamp).timetuple())
-        if current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
-            json_results = json.loads(cached_search.results)
-            results = json_results['searchResponse']['results']
+
+    if cached_search and current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
+        json_results = json.loads(cached_search.results)
+        results = json_results['searchResponse']['results']
     else:
         api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
@@ -350,10 +351,13 @@ def show_schedule(id):
         ## if there is a row in the table, see how fresh it is
         if cached_listings:
             cached_timestamp = mktime((cached_listings.timestamp).timetuple())
-            if current_timestamp - cached_timestamp < six_hours:
-                json_results = json.loads(cached_listings.results)
-                results = json_results['ProgramDetailsResult']['Schedule']['Airings']
 
+        ## if cached results exist AND they're recent, do this
+        if cached_listings and current_timestamp - cached_timestamp < six_hours:
+            json_results = json.loads(cached_listings.results)
+            results = json_results['ProgramDetailsResult']['Schedule']['Airings']
+        ## if nothing is cached or the cached
+        ## results aren't recent, do this
         else:
             api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
@@ -362,6 +366,7 @@ def show_schedule(id):
             if rovi_results.status_code == 200:
                 json_results = rovi_results.json()
 
+                ## overwrites single row in db with updated timestamp and results
                 if cached_listings:
                     cached_listings.timestamp = now
                     cached_listings.results = json.dumps(json_results)
