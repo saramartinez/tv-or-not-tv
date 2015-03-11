@@ -98,12 +98,16 @@ def find_provider():
 
             services = providers['ServicesResult']['Services']['Service']
 
-            store_results = CachedService(
-                zipcode_parameter=zipcode,
-                timestamp=now,
-                results=json.dumps(services))
-            modelsession.add(store_results)
-            modelsession.commit()
+            if cached_service:
+                cached_service.timestamp = now
+                cached_service.results = json.dumps(services)
+            else:
+                store_results = CachedService(
+                    zipcode_parameter=zipcode,
+                    timestamp=now,
+                    results=json.dumps(services))
+                modelsession.add(store_results)
+                modelsession.commit()
         else:
             services = None
             flash("There was an error retrieving service providers; please try again.")
@@ -242,13 +246,17 @@ def search_results():
         if rovi_results.status_code == 200:
             json_results = rovi_results.json()
 
-            ## save result to new table
-            store_results = CachedSearch(
-                query=query,
-                timestamp=now,
-                results=(json.dumps(json_results)))
-            modelsession.add(store_results)
-            modelsession.commit()
+            if cached_search:
+                cached_search.timestamp = now
+                cached_search.results = json.dumps(json_results)
+            else:
+                ## save result to new table
+                store_results = CachedSearch(
+                    query=query,
+                    timestamp=now,
+                    results=(json.dumps(json_results)))
+                modelsession.add(store_results)
+                modelsession.commit()
 
             results = json_results['searchResponse']['results']
         else:
