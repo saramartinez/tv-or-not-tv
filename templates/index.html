@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% block body %}
+<p class="lead">
 {% if session['logged_in'] %}
 View your <a href="/favorites/{{ session['id'] }}">favorites</a>, then see <a href="/schedule/{{ session['id'] }}">when they'll be on TV</a> next.
 {% else %}
 Please sign up to use TV or Not TV.
 {% endif %}
-
+</p>
 {% endblock %}

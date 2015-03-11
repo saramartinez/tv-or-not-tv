@@ -89,10 +89,7 @@ def find_provider():
         if current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
             services = json.loads(cached_service.results)
     else:
-        listings_request = "http://api.rovicorp.com/TVlistings/\
-        v9/listings/services/postalcode/%s/info?locale=en-\
-        US&countrycode=US&format=json&apikey=%s"\
-        % (zipcode, ROVI_LISTINGS_API_KEY)
+        listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
 
         listings_results = requests.get(listings_request)
 
@@ -238,13 +235,7 @@ def search_results():
             json_results = json.loads(cached_search.results)
             results = json_results['searchResponse']['results']
     else:
-        api_request = "http://api.rovicorp.com/search/v2.1\
-        /video/search?entitytype=tvseries&query="
-        + query
-        + "&rep=1&include=synopsis%2Cimages&size=5&offset=0\
-        &language=en&country=US&format=json&apikey="
-        + ROVI_SEARCH_API_KEY\
-        + "&sig=" + sig
+        api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
 
         rovi_results = requests.get(api_request)
 
@@ -356,12 +347,7 @@ def show_schedule(id):
                 results = json_results['ProgramDetailsResult']['Schedule']['Airings']
 
         else:
-            api_request = "http://api.rovicorp.com/TVlistings/v9/\
-            listings/programdetails/%s/%s/info?locale=en-US&\
-            copytextformat=PlainText&include=Program&\
-            imagecount=5&duration=10080&inprogress=true&\
-            startdate=%s&pagesize=6&format=json\
-            &apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
+            api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
             rovi_results = requests.get(api_request)
 

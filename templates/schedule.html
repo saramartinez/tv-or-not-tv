@@ -2,88 +2,84 @@
 {% block body %}
 
 {% if favorites %}
-	<ul>
 	{% for favorite in favorites %}
-		<li>
-		{{ favorite.show.title }}
 
 		{% if favorite.show.img %}
-			<p><img style="height:80px;" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
+			<p><img class="img-thumbnail" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
 		{% endif %}
 
-
+<div class="panel panel-default">
+<div class="panel-heading lead">Listings for <strong>{{ favorite.show.title }}</strong>
+</div>
 		{% if schedule[loop.index-1] %}
-			<p>Schedule:</p> 
-			<ul>
-				{% for item in schedule[loop.index-1] %}
-
-				<li class="schedule">
-				<script>
-
-				
-
-				$(document).ready(function() {
-
-				$(".schedule").each( function() {
-
-				var air_time = moment.utc("{{ item['AiringTime'] }}").local() ;
-
-				air_time = air_time.format("dddd, MMMM Do [at] LT");
-
-				var from_now = moment("{{ item['AiringTime'] }}").fromNow();
-
-				$(".{{ item['ProgramId'] }}").html("<strong>When: </strong>" + air_time + " <em>(" + from_now + ")</em>") });
-			});
-
-				</script>
-<p>
-					<span class="{{ item['ProgramId'] }}"></span><br>
+	<table class="table table-striped table-responsive">
+	<thead>
+	<tr>
+		<th>Date</th>
+		<th>Time</th>
+		<th>Channel</th>
+		<th>Synopsis</th>
+		<th></th>
+	</tr>
+	</thead>
 	
-						<strong>Channel:</strong> {{ item['Channel'] }}
+	<tbody>
+{% for item in schedule[loop.index-1] %}
+<script>
+	$(document).ready(function() {
+	$(".schedule").each( function() {
+	var air_time = moment.utc("{{ item['AiringTime'] }}").local();
+	var air_date = air_time
+	air_time = air_time.format("LT");
+	air_date = air_date.format("dddd, MMMM Do");
 
-						{% if item['HD'] %}
-							<strong>in HD</strong>
-						{% endif %}
+	var from_now = moment("{{ item['AiringTime'] }}").fromNow();
+	
+	$(".{{ item['ProgramId'] }}-date").html(air_date);
+	console.log(air_date);
 
-						({{ item['SourceLongName'] }})
+	console.log(air_time);
+	$(".{{ item['ProgramId'] }}-time").html(air_time + " <em>(" + from_now + ")</em>") });
+			});
+</script>
 
-						{% if item['AiringType']=='New' %}
-							<strong><em>(NEW EPISODE)</em></strong>
-						{% else %}
-							<em>(Repeat)</em>
-						{% endif %}
-					<br>
-					
-					{% if item['Copy'] %}
-						<strong>Synopsis: </strong>
-					{% endif %}
+	<tr class="schedule">
+	<td class="{{ item['ProgramId'] }}-date"></td>
+	<td class="{{ item['ProgramId'] }}-time"></td>
+	<td>{{ item['Channel'] }} {% if item['HD'] %}<strong>(HD)</strong>{% endif %} <em>({{ item['SourceLongName'] }})</em>
+	</td>
+	
+	<td>
+	{% if item['EpisodeTitle'] %}
+		<em>"{{ item['EpisodeTitle'] }}" —</em>
+	{% endif %}
 
-					{% if item['EpisodeTitle'] %}
-						<em>"{{ item['EpisodeTitle'] }}" —</em>
-					{% endif %}
-
-					{% if item['Copy'] %}
-						{{ item['Copy'] }}
-					{% endif %}
-					</p>
-				</li>
-
-				{% endfor %}
-			</ul>
+	{% if item['Copy'] %}
+		{{ item['Copy'] }}
+	{% endif %}
+	</td>
+	{% if item['AiringType']=='New' %}
+		<td><strong>New Episode</strong></td>
+	{% else %}
+		<td><em>Repeat</em></td>
+	{% endif %}
+	</tr>
+{% endfor %}
+	</tbody>
+</table>
+</div>
 		{% else %}
 			<ul><li>
 				No showtimes in the next week.
 			</li></ul>
 		{% endif %}
 
-		</li>
 	{% endfor %}
 
-</ul>
 
 
 {% else %}
-Favorites go here
+<It looks like you don't have any favorites saved. Search for a show and add it to your favorites to see upcoming TV listings.
 {% endif %}
 
 
