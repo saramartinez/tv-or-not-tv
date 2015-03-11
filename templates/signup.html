@@ -4,13 +4,13 @@
 
 $(document).ready(function() {
 
-	$("#zipcode-field").keyup( 
+	$("#zipcode").keyup( 
 
 	function(e) {
-	var len = $("#zipcode-field").val().length;
+	var len = $("#zipcode").val().length;
 
 	if (len>4) {
-	var url = "/find-provider?zipcode=" + $("#zipcode-field").val();
+	var url = "/find-provider?zipcode=" + $("#zipcode").val();
 
 		$.get(url,
 			function(result) {
@@ -21,7 +21,7 @@ $(document).ready(function() {
 				
 				$(result.services).each( function() {
 					
-					$("#service-options").append("<li><label><input type='radio' name='service-provider' value='" + this['ServiceId'] + "'>" + this['Name'] + "</label></li>"); 
+					$("#service-options").append("<div class='radio'><li><label><input type='radio' name='service-provider' value='" + this['ServiceId'] + "'>" + this['Name'] + "</label></li></div>"); 
 
 				}); 
 			}); 
@@ -32,16 +32,28 @@ $(document).ready(function() {
 </script>
 
 
-<h2>New users, sign up:</h2>
+<h3>New users, sign up:</h3>
 
 <form id="signup" action="/signup" method="POST">
-    <label><input type="username" name="username" placeholder="Name" required autofocus /></label><br>
-    <label><input type="email" name="email" placeholder="Email Address" required /></label><br>
-    <label><input type="password" name="password" placeholder="Password" required /></label><br>
-    <label><input type="zipcode" id="zipcode-field" name="zipcode" placeholder="Zip Code" required /><br>
+<div class="form-group">
+    <label for="username">Name</label>
+    <input class="form-control" type="text" name="username" placeholder="Name" id="username"required autofocus />
+</div>
+<div class="form-group">
+    <label for="email">Email Address</label>
+    <input class="form-control" id="email" type="email" name="email" placeholder="example@gmail.com" required />
+</div>
+<div class="form-group">
+    <label for="zipcode">Zip Code</label>
+    <input class="form-control" id="zipcode" type="text" name="zipcode" placeholder="Zip Code" required />
+    <p class="help-block">Enter zip code to find TV service provider.</p>
+</div>
+<div class="form-group">
     <p class="show-options"></p>
-    <ul id="service-options">
+    <div class="input-group">
+    <ul class="list-unstyled" id="service-options">
     </ul>
+</div></div>
 <span id="timezone-input"></span>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.4/jstz.min.js"></script>
 <script>
@@ -55,9 +67,10 @@ tz.setAttribute('value', timezone);
 
 $("#timezone-input").append(tz);
 </script>
-<br>
-
-
-    <label><input type="submit" value="Sign Up"></label>
+<div class="form-group">
+    <label for="password">Password</label>
+    <input class="form-control" type="password" name="password" placeholder="Password" required />
+</div>
+    <button type="submit" id="submit" class="btn btn-default" value="Sign Up">Sign Up</button>
 </form>
 {% endblock %}

@@ -354,14 +354,18 @@ def show_schedule(id):
             if rovi_results.status_code == 200:
                 json_results = rovi_results.json()
 
-                ## save JSON object to CachedListing
-                store_results = CachedListing(
-                    service_id=serviceid,
-                    show_id=cosmoid,
-                    timestamp=now,
-                    results=(json.dumps(json_results)))
-                modelsession.add(store_results)
-                modelsession.commit()
+                if cached_listings:
+                    cached_listings.timestamp = now
+                    cached_listings.results = json.dumps(json_results)
+                else:
+                    ## save JSON object to CachedListing
+                    store_results = CachedListing(
+                        service_id=serviceid,
+                        show_id=cosmoid,
+                        timestamp=now,
+                        results=(json.dumps(json_results)))
+                    modelsession.add(store_results)
+                    modelsession.commit()
 
                 results = json_results['ProgramDetailsResult']['Schedule']['Airings']
 

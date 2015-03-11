@@ -45,11 +45,11 @@ $(document).ready(function() {
     <p><label>Zip Code: <input type="zipcode" id="zipcode-field" name="zipcode" placeholder="{{ user.zipcode}}" /></label></p>
     <p><strong>Service Provider:</strong> {{ user.service.name }} <em>(Enter zip code to look for another provider)</em></p>
     <p class="change-service">
-    	<button id='change-service' type='button'>Change Service Provider</button>
+    	<button id='change-service' class='btn btn-default' type='button'>Change Service Provider</button>
     </p>
     <p class="show-options"></p>
     <ul id="service-options">
     </ul>
 
-<p><button id="update-profile" type="submit">Update Profile</button></p>
+<p><button id="update-profile" class="btn btn-default" type="submit">Update Profile</button></p>
 </form>

@@ -5,7 +5,11 @@
 	{% for favorite in favorites %}
 
 		{% if favorite.show.img %}
-			<p><img class="img-thumbnail" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
+		<div class="media">
+			<div class="media-left">
+			<img class="media-object" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}">
+			</div>
+		<div class="media-body">
 		{% endif %}
 
 <div class="panel panel-default">
@@ -22,7 +26,7 @@
 		<th></th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 {% for item in schedule[loop.index-1] %}
 <script>
@@ -36,9 +40,7 @@
 	var from_now = moment("{{ item['AiringTime'] }}").fromNow();
 	
 	$(".{{ item['ProgramId'] }}-date").html(air_date);
-	console.log(air_date);
 
-	console.log(air_time);
 	$(".{{ item['ProgramId'] }}-time").html(air_time + " <em>(" + from_now + ")</em>") });
 			});
 </script>
@@ -68,18 +70,21 @@
 	</tbody>
 </table>
 </div>
+
 		{% else %}
 			<ul><li>
 				No showtimes in the next week.
 			</li></ul>
 		{% endif %}
-
+{% if favorite.show.img %}
+</div></div>
+{% endif %}
 	{% endfor %}
 
 
 
 {% else %}
-<It looks like you don't have any favorites saved. Search for a show and add it to your favorites to see upcoming TV listings.
+It looks like you don't have any favorites saved. Search for a show and add it to your favorites to see upcoming TV listings.
 {% endif %}
 
 
