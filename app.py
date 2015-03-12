@@ -330,15 +330,24 @@ def show_favorites():
     return render_template("favorites.html", id=user_id, favorites=favorites)
 
 @app.route("/schedule/") ## paging int; 1 by default then increase
-def show_schedule(): ## bool / (id, is_cron) 
+def show_listings(): ## bool / (id, is_cron)
+    if session['id']:
+        user_id = session['id']
+        results = get_listings(user_id)
+        results_list = results
+        favorites = modelsession.query(Favorite).filter(Favorite.user_id == user_id).all()
+
+    return render_template("schedule.html", schedule=results_list, favorites=favorites)
+
+@app.route("/listings/")
+def get_listings(user_id): ## bool / (id, is_cron) 
     """
     Gets user's first five favorites from database, then
     determine's user's service_id, current datetime and
     5 days from now to build API query. Results with
     broadcast times append to list to be returned to HTML.
     """
-    if session['id']:
-        user_id = session['id']
+    if user_id:
         favorites = modelsession.query(Favorite).filter(Favorite.user_id == user_id).limit(5)
         serviceid = modelsession.query(User.service_id).filter(User.id == user_id).first()[0]
 
@@ -405,14 +414,8 @@ def show_schedule(): ## bool / (id, is_cron)
 
         results_list.append(results)
 
-## how to get results to return back to notifications function 
-## just return the data
+        return results_list
 
-# @app.route blhalje
-# show_schedule
-# return template
-
-    return render_template("schedule.html", schedule=results_list, favorites=favorites)
 
 
 if __name__ == "__main__":

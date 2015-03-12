@@ -3,7 +3,7 @@ from datetime import datetime
 from time import time, mktime
 from model import session as modelsession
 from model import User, Show, Service, Favorite, CachedService, CachedListing, CachedSearch
-from app import show_schedule
+from app import get_listings
 from twilio.rest import TwilioRestClient 
 
 ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
@@ -21,7 +21,7 @@ def send_notification():
 	users = modelsession.query(User).filter(User.phone != None, User.get_texts == True)
 
 	for user in users:
-		listings = show_schedule(user.id)
+		listings = get_listings(user.id)
 		## want to return just results list not whole template
 
 		for item in listings:
