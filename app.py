@@ -9,15 +9,15 @@ from time import time, mktime
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'comingsoon'
+app.secret_key = os.environ['APP_SECRET_KEY']
 ROVI_LISTINGS_API_KEY = os.environ['ROVI_TV_LISTINGS_API_KEY']
 ROVI_SEARCH_API_KEY = os.environ['ROVI_METADATA_SEARCH_API_KEY']
 ROVI_SEARCH_SECRET_KEY = os.environ['ROVI_METADATA_SHARED_SECRET']
 
-unix_time = int(time())
-sig = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(unix_time)).hexdigest()
-now = datetime.utcnow()
-current_timestamp = mktime(now.timetuple())
+UNIX_TIME = int(time())
+SIG = hashlib.md5(ROVI_SEARCH_API_KEY + ROVI_SEARCH_SECRET_KEY + str(UNIX_TIME)).hexdigest()
+NOW = datetime.utcnow()
+CURRENT_TIMESTAMP = mktime(NOW.timetuple())
 WEEK_IN_SECONDS = 604800
 
 @app.route("/")
@@ -86,7 +86,7 @@ def find_provider():
 
     if cached_service:
         cached_timestamp = mktime((cached_service.timestamp).timetuple())
-    if cached_service and current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
+    if cached_service and CURRENT_TIMESTAMP - cached_timestamp < WEEK_IN_SECONDS:
         services = json.loads(cached_service.results)
     else:
         listings_request = "http://api.rovicorp.com/TVlistings/v9/listings/services/postalcode/%s/info?locale=en-US&countrycode=US&format=json&apikey=%s" % (zipcode, ROVI_LISTINGS_API_KEY)
@@ -99,12 +99,12 @@ def find_provider():
             services = providers['ServicesResult']['Services']['Service']
 
             if cached_service:
-                cached_service.timestamp = now
+                cached_service.timestamp = NOW
                 cached_service.results = json.dumps(services)
             else:
                 store_results = CachedService(
                     zipcode_parameter=zipcode,
-                    timestamp=now,
+                    timestamp=NOW,
                     results=json.dumps(services))
                 modelsession.add(store_results)
                 modelsession.commit()
@@ -236,11 +236,11 @@ def search_results():
     if cached_search:
         cached_timestamp = mktime((cached_search.timestamp).timetuple())
 
-    if cached_search and current_timestamp - cached_timestamp < WEEK_IN_SECONDS:
+    if cached_search and CURRENT_TIMESTAMP - cached_timestamp < WEEK_IN_SECONDS:
         json_results = json.loads(cached_search.results)
         results = json_results['searchResponse']['results']
     else:
-        api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + sig
+        api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + SIG
 
         rovi_results = requests.get(api_request)
 
@@ -248,13 +248,13 @@ def search_results():
             json_results = rovi_results.json()
 
             if cached_search:
-                cached_search.timestamp = now
+                cached_search.timestamp = NOW
                 cached_search.results = json.dumps(json_results)
             else:
                 ## save result to new table
                 store_results = CachedSearch(
                     query=query,
-                    timestamp=now,
+                    timestamp=NOW,
                     results=(json.dumps(json_results)))
                 modelsession.add(store_results)
                 modelsession.commit()
@@ -334,7 +334,7 @@ def show_schedule(id):
 
     serviceid = modelsession.query(User.service_id).filter(User.id == id).first()[0]
 
-    start = now.strftime("%Y-%m-%dT%H%%3A%M%%3A%S.%fZ")
+    start = NOW.strftime("%Y-%m-%dT%H%%3A%M%%3A%S.%fZ")
 
     results_list = []
 
@@ -353,7 +353,7 @@ def show_schedule(id):
             cached_timestamp = mktime((cached_listings.timestamp).timetuple())
 
         ## if cached results exist AND they're recent, do this
-        if cached_listings and current_timestamp - cached_timestamp < six_hours:
+        if cached_listings and CURRENT_TIMESTAMP - cached_timestamp < six_hours:
             json_results = json.loads(cached_listings.results)
             results = json_results['ProgramDetailsResult']['Schedule']['Airings']
         ## if nothing is cached or the cached
@@ -368,14 +368,14 @@ def show_schedule(id):
 
                 ## overwrites single row in db with updated timestamp and results
                 if cached_listings:
-                    cached_listings.timestamp = now
+                    cached_listings.timestamp = NOW
                     cached_listings.results = json.dumps(json_results)
                 else:
                     ## save JSON object to CachedListing
                     store_results = CachedListing(
                         service_id=serviceid,
                         show_id=cosmoid,
-                        timestamp=now,
+                        timestamp=NOW,
                         results=(json.dumps(json_results)))
                     modelsession.add(store_results)
                     modelsession.commit()
@@ -386,6 +386,8 @@ def show_schedule(id):
             else:
                 flash("The request timed out. Please refresh the page.")
                 results = None
+            print results[0]['AiringTime']
+            print type(results[0]['AiringTime'])
 
         results_list.append(results)
 
