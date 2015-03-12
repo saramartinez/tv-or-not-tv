@@ -19,10 +19,10 @@
 	<table class="table table-striped table-responsive">
 	<thead> 
 	<tr>
-		<th>Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-		<th>Time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-		<th>Channel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-		<th>Synopsis</th>
+		<th class="table-header-date">Date</th>
+		<th class="table-header-time">Time</th>
+		<th class="table-header-channel">Channel</th>
+		<th class="table-header-synopsis">Synopsis</th>
 		<th></th>
 	</tr>
 	</thead>
@@ -45,6 +45,7 @@
 </script>
 
 	<tr class="schedule">
+
 	<td class="{{ item['ProgramId'] }}-date"></td>
 	<td class="{{ item['ProgramId'] }}-time"></td>
 	<td>{{ item['Channel'] }} {% if item['HD'] %}<strong>(HD)</strong>{% endif %} <em>({{ item['SourceLongName'] }})</em>

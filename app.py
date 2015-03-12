@@ -166,25 +166,31 @@ def logout():
     flash("You were logged out.")
     return redirect("/")
 
-@app.route("/settings/<int:id>")
-def user_settings(id):
+@app.route("/settings/")
+def user_settings():
     """Displays user profile"""
-    user_profile = modelsession.query(User).filter(User.id == id).one()
-    return render_template("settings.html", id=id, user=user_profile)
+    if session['id']:
+        user_id = session['id']
+    user_profile = modelsession.query(User).filter(User.id == user_id).one()
+    return render_template("settings.html", id=user_id, user=user_profile)
 
-@app.route("/settings/<int:id>/edit")
-def edit_settings(id):
+@app.route("/settings/edit")
+def edit_settings():
     """Displays template for user to edit profile"""
-    user_profile = modelsession.query(User).filter(User.id == id).one()
-    return render_template("edit-settings.html", id=id, user=user_profile)
+    if session['id']:
+        user_id = session['id']
+        user_profile = modelsession.query(User).filter(User.id == user_id).one()
+    return render_template("edit-settings.html", id=user_id, user=user_profile)
 
-@app.route("/settings/<int:id>/update", methods=["POST"])
-def update_settings(id):
+@app.route("/settings/update", methods=["POST"])
+def update_settings():
     """
     Updates user in database if they enter correct
     password when editing settings.
     """
-    user_profile = modelsession.query(User).filter(User.id == id).one()
+    if session['id']:
+        user_id = session['id']
+        user_profile = modelsession.query(User).filter(User.id == user_id).one()
 
     old_password = request.form.get("old-password")
     new_email = request.form.get("email", None)
@@ -213,7 +219,7 @@ def update_settings(id):
     else:
         flash("Incorrect password, please try again.")
 
-    return redirect("/settings/" + str(id))
+    return redirect("/settings/")
 
 @app.route("/search")
 def search():
@@ -310,29 +316,31 @@ def add_to_favorites():
 
     return redirect("/")
 
-@app.route("/favorites/<int:id>")
-def show_favorites(id):
+@app.route("/favorites/")
+def show_favorites():
     """
     Queries favorites table with user's ID to determine
     which shows are saved as favorites, then passes
     to HTMl to display all.
     """
-    favorites = modelsession.query(Favorite).filter(Favorite.user_id == id).all()
-    favorite = favorites.sort()
-    return render_template("favorites.html", id=id, favorites=favorites)
+    if session['id']:
+        user_id = session['id']
+        favorites = modelsession.query(Favorite).filter(Favorite.user_id == user_id).all()
+        favorite = favorites.sort()
+    return render_template("favorites.html", id=user_id, favorites=favorites)
 
-@app.route("/schedule/<int:id>")
-def show_schedule(id):
+@app.route("/schedule/") ## paging int; 1 by default then increase
+def show_schedule(): ## bool / (id, is_cron) 
     """
     Gets user's first five favorites from database, then
     determine's user's service_id, current datetime and
     5 days from now to build API query. Results with
     broadcast times append to list to be returned to HTML.
     """
-    favorites = modelsession.query(Favorite).filter(Favorite.user_id == id).limit(5)
-    favorites = sorted(favorites)
-
-    serviceid = modelsession.query(User.service_id).filter(User.id == id).first()[0]
+    if session['id']:
+        user_id = session['id']
+        favorites = modelsession.query(Favorite).filter(Favorite.user_id == user_id).limit(5)
+        serviceid = modelsession.query(User.service_id).filter(User.id == user_id).first()[0]
 
     start = NOW.strftime("%Y-%m-%dT%H%%3A%M%%3A%S.%fZ")
 
@@ -383,13 +391,26 @@ def show_schedule(id):
                 results = json_results['ProgramDetailsResult']['Schedule']['Airings']
 
                 results = sorted(results, key=lambda results: results['AiringTime'])
+
+                # for each in results:
+                #     ## compare each to each to see if each['Copy'] and each['AiringTime'] are the same
+                #     ## dict == key + copy; insert results list as value
+                #     if each['AiringTime'] 
+
+                #     each['Copy']
+
             else:
                 flash("The request timed out. Please refresh the page.")
                 results = None
-            print results[0]['AiringTime']
-            print type(results[0]['AiringTime'])
 
         results_list.append(results)
+
+## how to get results to return back to notifications function 
+## just return the data
+
+# @app.route blhalje
+# show_schedule
+# return template
 
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
 

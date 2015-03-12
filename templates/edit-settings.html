@@ -36,8 +36,8 @@ $(document).ready(function() {
 });
 
 </script>
-
-<form id="update-settings" action="/settings/{{ user.id }}/update") method="POST">
+<div id="container">
+<form id="update-settings" action="/settings/update") method="POST">
     <p><label>Name: <input type="name" name="username" placeholder="{{ user.name }}" autofocus /></label></p>
     <p><label>Email: <input type="email" name="email" placeholder="{{ user.email }}" /></label></p>
     <p><label>Old Password: <input type="password" name="old-password" placeholder="Required" required /></label></p>
@@ -53,3 +53,4 @@ $(document).ready(function() {
 
 <p><button id="update-profile" class="btn btn-default" type="submit">Update Profile</button></p>
 </form>
+</div>

@@ -9,8 +9,8 @@ from twilio.rest import TwilioRestClient
 ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
 AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
 TWILIO_PHONE = os.environ['TWILIO_PHONE']
-CLIENT = TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN) 
 
+CLIENT = TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN) 
 
 NOW = datetime.utcnow()
 CURRENT_TIMESTAMP = mktime(NOW.timetuple())
@@ -22,7 +22,8 @@ def send_notification():
 
 	for user in users:
 		listings = show_schedule(user.id)
-		## want to return just resulst list not whole template
+		## want to return just results list not whole template
+
 		for item in listings:
 			if item['AiringType'] =='new':
 				air_time = mktime(item['AiringTime'].timetuple())
@@ -43,10 +44,13 @@ def send_notification():
 					air_time = air_time.astimezone(to_zone)
 
 					## format for text message
-					friendly_time = air_time.strftime("%b %d at %I:%M %p")
+					friendly_time = air_time.strftime("%I:%M %p, %b %d")
+					title = item['Title']
+
+					text_message = "A new episode of %s is on at %s tonight" % (title, friendly_time)
 
 					CLIENT.messages.create(
 						to=user.phone, 
 						from_=TWILIO_PHONE, 
-						body= "A new episode of " + item['Title'] + " is on at " + friendly_time + " tonight",  
+						body=text_message,  
 					)
