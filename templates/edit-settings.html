@@ -40,16 +40,20 @@ $(document).ready(function() {
 <form id="update-settings" action="/settings/update") method="POST">
     <p><label>Name: <input type="name" name="username" placeholder="{{ user.name }}" autofocus /></label></p>
     <p><label>Email: <input type="email" name="email" placeholder="{{ user.email }}" /></label></p>
-    <p><label>Old Password: <input type="password" name="old-password" placeholder="Required" required /></label></p>
-    <p><label>New Password: <input type="password" name="new-password" placeholder="Optional" /></label></p>
+	<p><label>Phone Number: <input type="tel" name="phone" placeholder="{{ user.phone }}" /></label></p>
+	<p><strong>Get Text Notifications:</strong> <input type="checkbox" name="get_texts" {% if user.get_texts == 1 %}checked="checked"{% endif %} value="True"></p>
+
     <p><label>Zip Code: <input type="zipcode" id="zipcode-field" name="zipcode" placeholder="{{ user.zipcode}}" /></label></p>
     <p><strong>Service Provider:</strong> {{ user.service.name }} <em>(Enter zip code to look for another provider)</em></p>
     <p class="change-service">
     	<button id='change-service' class='btn btn-default' type='button'>Change Service Provider</button>
     </p>
-    <p class="show-options"></p>
+        <p class="show-options"></p>
     <ul id="service-options">
     </ul>
+    <p><label>Old Password: <input type="password" name="old-password" placeholder="Required" required /></label></p>
+    <p><label>New Password: <input type="password" name="new-password" placeholder="Optional" /></label></p>
+
 
 <p><button id="update-profile" class="btn btn-default" type="submit">Update Profile</button></p>
 </form>

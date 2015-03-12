@@ -5,6 +5,7 @@ import os
 import requests
 import json
 import hashlib
+import string
 from time import time, mktime
 from datetime import datetime
 
@@ -44,8 +45,16 @@ def process_signup():
 
     name = request.form.get("username")
     zipcode = request.form.get("zipcode")
+    phone = str(request.form.get("phone", None))
     service_id = request.form.get("service-provider")
     timezone = request.form.get("timezone")
+    get_texts = bool(request.form.get("get_texts", False))
+
+    ## removes punctuation and country code from phone number
+    exclude = set(string.punctuation)
+    phone = ''.join(ch for ch in phone if ch not in exclude)
+    if phone[0] == '1':
+        phone = phone[1:]
 
     existing_user = modelsession.query(User).filter(User.email == new_email).first()
 
@@ -54,6 +63,8 @@ def process_signup():
             name=name,
             email=new_email,
             password=new_password,
+            phone=phone,
+            get_texts=get_texts,
             zipcode=zipcode,
             service_id=service_id,
             timezone=timezone)
@@ -198,6 +209,14 @@ def update_settings():
     new_name = request.form.get("username", None)
     new_zipcode = request.form.get("zipcode", None)
     new_service_id = request.form.get("service-provider", None)
+    new_get_texts = request.form.get("get-texts", False)
+    new_phone = str(request.form.get("phone"))
+
+    ## removes punctuation and country code from phone number
+    exclude = set(string.punctuation)
+    new_phone = ''.join(ch for ch in new_phone if ch not in exclude)
+    if new_phone[0] == '1':
+        new_phone = new_phone[1:]
 
     if old_password == user_profile.password:
         if new_email:
@@ -210,6 +229,10 @@ def update_settings():
             user_profile.zipcode = new_zipcode
         if new_service_id:
             user_profile.service_id = new_service_id
+        if new_get_texts:
+            user_profile.get_texts = new_get_texts
+        if new_phone:
+            user_profile.phone = new_phone
 
         modelsession.commit()
         modelsession.refresh(user_profile)

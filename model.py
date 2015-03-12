@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
 
 ENGINE = create_engine("sqlite:///tv.db", echo=True)
@@ -27,6 +27,8 @@ class User(Base):
     email = Column(String(64), nullable=True)
     password = Column(String(64), nullable=True)
     name = Column(String(64), nullable=True)
+    phone = Column(String(15), nullable=True)
+    get_texts = Column(Boolean)
     zipcode = Column(String(15), nullable=True)
     timezone = Column(String(64), nullable=True)
     service_id = Column(Integer, ForeignKey('services.id')) # ServiceId in rovi

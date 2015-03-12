@@ -67,6 +67,16 @@ tz.setAttribute('value', timezone);
 
 $("#timezone-input").append(tz);
 </script>
+
+<div class="form-group">
+    <label for="phone">Phone Number</label>
+    <div class="input-group">
+    <span class="input-group-addon">
+    <input type="checkbox" id="get_texts" name="get_texts" value="True" aria-label="get-texts"></span>
+    <input class="form-control" id="phone" type="tel" name="phone" placeholder="777-555-1212" aria-label="phone-number" /></div>
+<p class="help-block">Select this box if you would like to receive text alerts for new episodes.</p>
+</div>
+
 <div class="form-group">
     <label for="password">Password</label>
     <input class="form-control" type="password" name="password" placeholder="Password" required />
