@@ -17,7 +17,7 @@ $("#edit-profile").click( function() {
 
 <p><strong>Email:</strong> {{ user.email }}</p>
 
-<p><strong>Phone Number:</strong> {% if user.phone %}{{ user.phone }}{% else %}None{% endfor %}</p>
+<p><strong>Phone Number:</strong> {% if user.phone %}{{ user.phone }}{% else %}None{% endif %}</p>
 
 <p><strong>Get Text Notifications:</strong> {% if user.get_texts == 1 %}Yes{% else%}No{% endif %}</p>
 

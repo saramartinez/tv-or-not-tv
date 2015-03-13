@@ -52,7 +52,7 @@ def send_notification():
 							friendly_time = air_time.strftime("%I:%M %p, %b %d")
 							title = each['Title']
 
-							text_message = "A new episode of %s is on at %s tonight" % (title, friendly_time)
+							text_message = 'A new episode of "%s" is on at %s tonight' % (title, friendly_time)
 
 							print text_message
 
