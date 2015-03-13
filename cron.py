@@ -1,5 +1,6 @@
 import os
-from datetime import datetime
+from datetime import datetime 
+from dateutil import tz
 from time import time, mktime
 from model import session as modelsession
 from model import User, Show, Service, Favorite, CachedService, CachedListing, CachedSearch
@@ -23,34 +24,44 @@ def send_notification():
 	for user in users:
 		listings = get_listings(user.id)
 		## want to return just results list not whole template
+		if listings:
+			for item in listings:
+				for each in item:
+					if each['AiringType'] == 'New':
 
-		for item in listings:
-			if item['AiringType'] =='new':
-				air_time = mktime(item['AiringTime'].timetuple())
-				## if air time is within next 12 hours, 
-				## assuming we run this script at 1 p.m. every day:
-				if air_time - CURRENT_TIMESTAMP < TWELVE_HOURS:
+						## change unicode item['AiringTime'] to python datetime object
+						air_time = datetime.strptime(each['AiringTime'], '%Y-%m-%dT%H:%M:%SZ')
 
-					from_zone = tz.gettz('UTC')
-					to_zone = tz.gettz(user.timezone)
+						## get unix timestamp for air_time
+						air_time_stamp = mktime(air_time.timetuple())
 
-					## change unicode item['AiringTime'] to python datetime object
-					air_time = datetime.strptime(item['AiringTime'], '%Y-%m-%dT%H:%M:%SZ')
+						## if air time is within next 12 hours, 
+						## assuming we run this script at 1 p.m. every day:
+						if air_time_stamp - CURRENT_TIMESTAMP < TWELVE_HOURS:
 
-					# Tell the datetime object it's in UTC time zone
-					air_time = air_time.replace(tzinfo=from_zone)
+							from_zone = tz.gettz('UTC')
+							to_zone = tz.gettz(user.timezone)
 
-					# convert to user's timezone
-					air_time = air_time.astimezone(to_zone)
+							# Tell the datetime object it's in UTC time zone
+							air_time = air_time.replace(tzinfo=from_zone)
 
-					## format for text message
-					friendly_time = air_time.strftime("%I:%M %p, %b %d")
-					title = item['Title']
+							# convert to user's timezone
+							air_time = air_time.astimezone(to_zone)
 
-					text_message = "A new episode of %s is on at %s tonight" % (title, friendly_time)
+							## format for text message
+							friendly_time = air_time.strftime("%I:%M %p, %b %d")
+							title = each['Title']
 
-					CLIENT.messages.create(
-						to=user.phone, 
-						from_=TWILIO_PHONE, 
-						body=text_message,  
-					)
+							text_message = "A new episode of %s is on at %s tonight" % (title, friendly_time)
+
+							print text_message
+
+							user_phone = "+1" + user.phone
+
+							CLIENT.messages.create(
+								to=user_phone, 
+								from_=TWILIO_PHONE, 
+								body=text_message,  
+							)
+
+send_notification()
