@@ -28,44 +28,96 @@
 	</thead>
 
 	<tbody>
-{% for item in schedule[loop.index-1] %}
+{% for key, value in schedule[loop.index-1].iteritems() %}
+{% if value|length > 1 %}
+
 <script>
 	$(document).ready(function() {
-	$(".schedule").each( function() {
-	var air_time = moment.utc("{{ item['AiringTime'] }}").local();
+	$(".schedule").html( function() {
+	var air_time = moment.utc("{{ key[0] }}").local();
 	var air_date = air_time
 	air_time = air_time.format("LT");
 	air_date = air_date.format("dddd, MMMM Do");
 
-	var from_now = moment("{{ item['AiringTime'] }}").fromNow();
+	var from_now = moment("{{ key[0] }}").fromNow();
 	
-	$(".{{ item['ProgramId'] }}-date").html(air_date);
-	$(".{{ item['ProgramId'] }}-time").html(air_time + " <em>(" + from_now + ")</em>") });
+	$(".{{ value['ProgramId'] }}-date").html(air_date);
+	$(".{{ value['ProgramId'] }}-time").html(air_time + " <em>(" + from_now + ")</em>") });
 			});
 </script>
 
 	<tr class="schedule">
 
-	<td class="{{ item['ProgramId'] }}-date"></td>
-	<td class="{{ item['ProgramId'] }}-time"></td>
-	<td>{{ item['Channel'] }} {% if item['HD'] %}<strong>(HD)</strong>{% endif %} <em>({{ item['SourceLongName'] }})</em>
+	<td class="{{ value['ProgramId'] }}-date"></td>
+	<td class="{{ value['ProgramId'] }}-time"></td>
+
+	
+	<td>{% for each in value %}
+	<li>{{ each['Channel'] }} {% if each['HD'] %}<strong>(HD)</strong>{% endif %} <em>({{ each['SourceLongName'] }})</em></li>
+	{% endfor %}
 	</td>
 	
 	<td>
-	{% if item['EpisodeTitle'] %}
-		<em>"{{ item['EpisodeTitle'] }}" —</em>
+	{% if value[0]['EpisodeTitle'] %}
+		<em>"{{ value[0]['EpisodeTitle'] }}" —</em>
 	{% endif %}
 
-	{% if item['Copy'] %}
-		{{ item['Copy'] }}
+	{% if value[0]['Copy'] %}
+		{{ value[0]['Copy'] }}
 	{% endif %}
 	</td>
-	{% if item['AiringType']=='New' %}
+	{% if value[0]['AiringType']=='New' %}
 		<td><strong>New Episode</strong></td>
 	{% else %}
 		<td><em>Repeat</em></td>
 	{% endif %}
 	</tr>
+
+
+
+
+{% else %}
+
+<script>
+	$(document).ready(function() {
+	$(".schedule").each( function() {
+	var air_time = moment.utc("{{ each['AiringTime'] }}").local();
+	var air_date = air_time
+	air_time = air_time.format("LT");
+	air_date = air_date.format("dddd, MMMM Do");
+
+	var from_now = moment("{{ each['AiringTime'] }}").fromNow();
+	
+	$(".{{ each['ProgramId'] }}-date").html(air_date);
+	$(".{{ each['ProgramId'] }}-time").html(air_time + " <em>(" + from_now + ")</em>") });
+			});
+</script>
+
+
+	<tr class="schedule">
+
+	<td class="{{ each['ProgramId'] }}-date"></td>
+	<td class="{{ each['ProgramId'] }}-time"></td>
+	<td>{{ each['Channel'] }} {% if each['HD'] %}<strong>(HD)</strong>{% endif %} <em>({{ each['SourceLongName'] }})</em>
+	</td>
+	
+	<td>
+	{% if each['EpisodeTitle'] %}
+		<em>"{{ each['EpisodeTitle'] }}" —</em>
+	{% endif %}
+
+	{% if each['Copy'] %}
+		{{ each['Copy'] }}
+	{% endif %}
+	</td>
+	{% if each['AiringType']=='New' %}
+		<td><strong>New Episode</strong></td>
+	{% else %}
+		<td><em>Repeat</em></td>
+	{% endif %}
+	</tr>
+{% endif %}
+
 {% endfor %}
 	</tbody>
 </table>

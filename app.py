@@ -215,8 +215,10 @@ def update_settings():
     ## removes punctuation and country code from phone number
     exclude = set(string.punctuation)
     new_phone = ''.join(ch for ch in new_phone if ch not in exclude)
-    if new_phone[0] == '1':
-        new_phone = new_phone[1:]
+    
+    if new_phone:
+        if new_phone[0] == '1':
+            new_phone = new_phone[1:]
 
     if old_password == user_profile.password:
         if new_email:
@@ -353,7 +355,7 @@ def show_favorites():
     return render_template("favorites.html", id=user_id, favorites=favorites)
 
 @app.route("/schedule/") ## paging int; 1 by default then increase
-def show_listings(): ## bool / (id, is_cron)
+def show_listings():
     if session['id']:
         user_id = session['id']
         results = get_listings(user_id)
@@ -396,8 +398,9 @@ def get_listings(user_id): ## bool / (id, is_cron)
         if cached_listings and CURRENT_TIMESTAMP - cached_timestamp < six_hours:
             json_results = json.loads(cached_listings.results)
             results = json_results['ProgramDetailsResult']['Schedule']['Airings']
-        ## if nothing is cached or the cached
-        ## results aren't recent, do this
+
+        ## if nothing is cached or the cached results aren't
+        ## recent, do this
         else:
             api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
@@ -406,7 +409,8 @@ def get_listings(user_id): ## bool / (id, is_cron)
             if rovi_results.status_code == 200:
                 json_results = rovi_results.json()
 
-                ## overwrites single row in db with updated timestamp and results
+                ## overwrites single row in db with updated timestamp
+                ## and results
                 if cached_listings:
                     cached_listings.timestamp = NOW
                     cached_listings.results = json.dumps(json_results)
@@ -422,22 +426,23 @@ def get_listings(user_id): ## bool / (id, is_cron)
 
                 results = json_results['ProgramDetailsResult']['Schedule']['Airings']
 
-                results = sorted(results, key=lambda results: results['AiringTime'])
-
-                # for each in results:
-                #     ## compare each to each to see if each['Copy'] and each['AiringTime'] are the same
-                #     ## dict == key + copy; insert results list as value
-                #     if each['AiringTime'] 
-
-                #     each['Copy']
-
             else:
                 flash("The request timed out. Please refresh the page.")
                 results = None
 
-        results_list.append(results)
+        grouped_listings = {}
 
-        return results_list
+        if results:
+            results = sorted(results, key=lambda results: results['AiringTime'])
+
+            new_results = []
+            for each in results:
+                grouped_listings[(each['AiringTime'], each['EpisodeTitle'])] = new_results
+                new_results.append(each)
+
+        results_list.append(grouped_listings)
+
+    return results_list
 
 
 
