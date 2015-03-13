@@ -25,43 +25,43 @@ def send_notification():
 		listings = get_listings(user.id)
 		## want to return just results list not whole template
 		if listings:
-			for item in listings:
-				for each in item:
-					if each['AiringType'] == 'New':
+			for each in listings:
+				for key, value in each.iteritems():
+					if value[0]['AiringType'] == 'New':
 
 						## change unicode item['AiringTime'] to python datetime object
-						air_time = datetime.strptime(each['AiringTime'], '%Y-%m-%dT%H:%M:%SZ')
+						air_time = datetime.strptime(key[0], '%Y-%m-%dT%H:%M:%SZ')
 
 						## get unix timestamp for air_time
 						air_time_stamp = mktime(air_time.timetuple())
 
 						## if air time is within next 12 hours, 
 						## assuming we run this script at 1 p.m. every day:
-						if air_time_stamp - CURRENT_TIMESTAMP < TWELVE_HOURS:
+						# if air_time_stamp - CURRENT_TIMESTAMP < TWELVE_HOURS:
 
-							from_zone = tz.gettz('UTC')
-							to_zone = tz.gettz(user.timezone)
+						from_zone = tz.gettz('UTC')
+						to_zone = tz.gettz(user.timezone)
 
-							# Tell the datetime object it's in UTC time zone
-							air_time = air_time.replace(tzinfo=from_zone)
+						# Tell the datetime object it's in UTC time zone
+						air_time = air_time.replace(tzinfo=from_zone)
 
-							# convert to user's timezone
-							air_time = air_time.astimezone(to_zone)
+						# convert to user's timezone
+						air_time = air_time.astimezone(to_zone)
 
-							## format for text message
-							friendly_time = air_time.strftime("%I:%M %p, %b %d")
-							title = each['Title']
+						## format for text message
+						friendly_time = air_time.strftime("%I:%M %p, %A, %b %d")
+						title = value[0]['Title']
 
-							text_message = 'A new episode of "%s" is on at %s tonight' % (title, friendly_time)
+						text_message = 'A new episode of "%s" is on at %s' % (title, friendly_time)
 
-							print text_message
+						print text_message
 
-							user_phone = "+1" + user.phone
+						user_phone = "+1" + user.phone
 
-							CLIENT.messages.create(
-								to=user_phone, 
-								from_=TWILIO_PHONE, 
-								body=text_message,  
-							)
+						CLIENT.messages.create(
+							to=user_phone, 
+							from_=TWILIO_PHONE, 
+							body=text_message,  
+						)
 
 send_notification()
