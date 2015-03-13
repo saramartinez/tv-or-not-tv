@@ -439,9 +439,8 @@ def get_listings(user_id): ## bool / (id, is_cron)
                 key = (each['AiringTime'], each['EpisodeTitle'])
                 grouped_listings.setdefault(key,[]).append(each)
 
-            print grouped_listings
-
         results_list.append(grouped_listings)
+        print grouped_listings
 
     return results_list
 
