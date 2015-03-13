@@ -19,18 +19,17 @@ CURRENT_TIMESTAMP = mktime(NOW.timetuple())
 TWELVE_HOURS = 43200
 
 def send_notification():
-	users = modelsession.query(User).filter(User.phone != None, User.get_texts == True)
+	users = modelsession.query(User).filter(User.phone == 7086926162, User.get_texts == True)
 
 	for user in users:
 		listings = get_listings(user.id)
 		## want to return just results list not whole template
 		if listings:
 			for each in listings:
-				for key, value in each.iteritems():
-					if value[0]['AiringType'] == 'New':
-
-						## change unicode item['AiringTime'] to python datetime object
-						air_time = datetime.strptime(key[0], '%Y-%m-%dT%H:%M:%SZ')
+				for item in each:
+					if item[1][0]['AiringType'] == 'New':
+						# change unicode item['AiringTime'] to python datetime object
+						air_time = datetime.strptime(item[1][0]['AiringTime'], '%Y-%m-%dT%H:%M:%SZ')
 
 						## get unix timestamp for air_time
 						air_time_stamp = mktime(air_time.timetuple())
@@ -50,7 +49,7 @@ def send_notification():
 
 						## format for text message
 						friendly_time = air_time.strftime("%I:%M %p, %A, %b %d")
-						title = value[0]['Title']
+						title = item[1][0]['Title']
 
 						text_message = 'A new episode of "%s" is on at %s' % (title, friendly_time)
 

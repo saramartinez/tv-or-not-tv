@@ -397,8 +397,7 @@ def get_listings(user_id): ## bool / (id, is_cron)
 
         ## if cached results exist AND they're recent, do this
         if cached_listings and CURRENT_TIMESTAMP - cached_timestamp < six_hours:
-            json_results = json.loads(cached_listings.results)
-            results = json_results['ProgramDetailsResult']['Schedule']['Airings']
+            results_list = json.loads(cached_listings.results)
 
         ## if nothing is cached or the cached results aren't
         ## recent, do this
@@ -410,38 +409,34 @@ def get_listings(user_id): ## bool / (id, is_cron)
             if rovi_results.status_code == 200:
                 json_results = rovi_results.json()
 
-                ## overwrites single row in db with updated timestamp
-                ## and results
-                if cached_listings:
-                    cached_listings.timestamp = NOW
-                    cached_listings.results = json.dumps(json_results)
-                else:
-                    ## save JSON object to CachedListing
-                    store_results = CachedListing(
-                        service_id=serviceid,
-                        show_id=cosmoid,
-                        timestamp=NOW,
-                        results=(json.dumps(json_results)))
-                    modelsession.add(store_results)
-                    modelsession.commit()
-
                 results = json_results['ProgramDetailsResult']['Schedule']['Airings']
-
             else:
                 flash("The request timed out. Please refresh the page.")
                 results = None
 
-        grouped_listings = {}
-
-        if results:
-
+            grouped_listings = {}
             for each in results:
                 key = (each['AiringTime'], each['EpisodeTitle'])
                 grouped_listings.setdefault(key,[]).append(each)
 
-        grouped_listings = sorted(grouped_listings.iteritems())
+            grouped_listings = sorted(grouped_listings.iteritems())
 
-        results_list.append(grouped_listings)
+            results_list.append(grouped_listings)
+
+            ## overwrites single row in db with updated timestamp
+            ## and results
+            if cached_listings:
+                cached_listings.timestamp = NOW
+                cached_listings.results = results_list
+            else:
+                ## save JSON object to CachedListing
+                store_results = CachedListing(
+                    service_id=serviceid,
+                    show_id=cosmoid,
+                    timestamp=NOW,
+                    results=json.dumps(results_list))
+                modelsession.add(store_results)
+                modelsession.commit()
 
     return results_list
 
