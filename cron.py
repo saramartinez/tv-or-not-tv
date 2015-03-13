@@ -35,32 +35,29 @@ def send_notification():
 						air_time_stamp = mktime(air_time.timetuple())
 
 						## if air time is within next 12 hours, 
-						## assuming we run this script at 1 p.m. every day:
-						# if air_time_stamp - CURRENT_TIMESTAMP < TWELVE_HOURS:
+						# assuming we run this script at 1 p.m. every day:
 
-						from_zone = tz.gettz('UTC')
-						to_zone = tz.gettz(user.timezone)
+							from_zone = tz.gettz('UTC')
+							to_zone = tz.gettz(user.timezone)
 
-						# Tell the datetime object it's in UTC time zone
-						air_time = air_time.replace(tzinfo=from_zone)
+							# Tell the datetime object it's in UTC time zone
+							air_time = air_time.replace(tzinfo=from_zone)
 
-						# convert to user's timezone
-						air_time = air_time.astimezone(to_zone)
+							# convert to user's timezone
+							air_time = air_time.astimezone(to_zone)
 
-						## format for text message
-						friendly_time = air_time.strftime("%I:%M %p, %A, %b %d")
-						title = item[1][0]['Title']
+							## format for text message
+							friendly_time = air_time.strftime("%I:%M %p, %A, %b %d")
+							title = item[1][0]['Title']
 
-						text_message = 'A new episode of "%s" is on at %s' % (title, friendly_time)
+							text_message = 'A new episode of "%s" is on at %s' % (title, friendly_time)
 
-						print text_message
+							user_phone = "+1" + user.phone
 
-						user_phone = "+1" + user.phone
-
-						CLIENT.messages.create(
-							to=user_phone, 
-							from_=TWILIO_PHONE, 
-							body=text_message,  
-						)
+							CLIENT.messages.create(
+								to=user_phone, 
+								from_=TWILIO_PHONE, 
+								body=text_message,  
+							)
 
 send_notification()

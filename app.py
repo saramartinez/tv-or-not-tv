@@ -366,7 +366,7 @@ def show_listings():
     return render_template("schedule.html", schedule=results_list, favorites=favorites)
 
 @app.route("/listings/")
-def get_listings(user_id): ## bool / (id, is_cron) 
+def get_listings(user_id):
     """
     Gets user's first five favorites from database, then
     determine's user's service_id, current datetime and
@@ -439,8 +439,6 @@ def get_listings(user_id): ## bool / (id, is_cron)
                 modelsession.commit()
 
     return results_list
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
