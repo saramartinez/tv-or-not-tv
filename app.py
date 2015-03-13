@@ -435,10 +435,11 @@ def get_listings(user_id): ## bool / (id, is_cron)
         if results:
             results = sorted(results, key=lambda results: results['AiringTime'])
 
-            new_results = []
             for each in results:
-                grouped_listings[(each['AiringTime'], each['EpisodeTitle'])] = new_results
-                new_results.append(each)
+                key = (each['AiringTime'], each['EpisodeTitle'])
+                grouped_listings.setdefault(key,[]).append(each)
+
+            print grouped_listings
 
         results_list.append(grouped_listings)
 
