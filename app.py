@@ -8,6 +8,7 @@ import hashlib
 import string
 from time import time, mktime
 from datetime import datetime
+from operator import itemgetter
 
 app = Flask(__name__)
 app.secret_key = os.environ['APP_SECRET_KEY']
@@ -433,14 +434,14 @@ def get_listings(user_id): ## bool / (id, is_cron)
         grouped_listings = {}
 
         if results:
-            results = sorted(results, key=lambda results: results['AiringTime'])
 
             for each in results:
                 key = (each['AiringTime'], each['EpisodeTitle'])
                 grouped_listings.setdefault(key,[]).append(each)
 
+        grouped_listings = sorted(grouped_listings.iteritems())
+
         results_list.append(grouped_listings)
-        print grouped_listings
 
     return results_list
 

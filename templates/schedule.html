@@ -28,50 +28,50 @@
 	</thead>
 
 	<tbody>
-{% for key, value in schedule[loop.index-1].iteritems() %}
+
+{% for listings in schedule[loop.index-1] %}
 
 <script>
 	$(document).ready(function() {
 	$(".schedule").html( function() {
-	var air_time = moment.utc("{{ key[0] }}").local();
+	var air_time = moment.utc("{{ listings[1][0]['AiringTime'] }}").local();
 	var air_date = air_time
 	air_time = air_time.format("LT");
 	air_date = air_date.format("dddd, MMMM Do");
 
-	var from_now = moment("{{ key[0] }}").fromNow();
+	var from_now = moment("{{ listings[1][0]['AiringTime'] }}").fromNow();
 
-	$(".{{ value[0]['ProgramId'] }}-{{ value[0]['AiringType'] }}-date").html(air_date);
-	$(".{{ value[0]['ProgramId'] }}-{{ value[0]['AiringType'] }}-time").html(air_time + " <em>(" + from_now + ")</em>") });
+	$(".{{ listings[1][0]['ProgramId'] }}-{{ listings[1][0]['AiringType'] }}-date").html(air_date);
+	$(".{{ listings[1][0]['ProgramId'] }}-{{ listings[1][0]['AiringType'] }}-time").html(air_time + " <em>(" + from_now + ")</em>") });
 			});
 </script>
 
 	<tr class="schedule">
 
-	<td class="{{ value[0]['ProgramId'] }}-{{ value[0]['AiringType'] }}-date"></td>
-	<td class="{{ value[0]['ProgramId'] }}-{{ value[0]['AiringType'] }}-time"></td>
+	<td class="{{ listings[1][0]['ProgramId'] }}-{{ listings[1][0]['AiringType'] }}-date"></td>
+	<td class="{{ listings[1][0]['ProgramId'] }}-{{ listings[1][0]['AiringType'] }}-time"></td>
 
 	
-	<td>{% for i in value %}
+	<td>{% for i in listings[1] %}
 	<li>{{ i['Channel'] }} {% if i['HD'] %}<strong>(HD)</strong>{% endif %} <em>({{ i['SourceLongName'] }})</em></li>
 	{% endfor %}
 	</td>
 	
 	<td>
-	{% if value[0]['EpisodeTitle'] %}
-		<em>"{{ value[0]['EpisodeTitle'] }}" —</em>
+	{% if listings[1][0]['EpisodeTitle'] %}
+		<em>"{{ listings[1][0]['EpisodeTitle'] }}" —</em>
 	{% endif %}
 
-	{% if value[0]['Copy'] %}
-		{{ value[0]['Copy'] }}
+	{% if listings[1][0]['Copy'] %}
+		{{ listings[1][0]['Copy'] }}
 	{% endif %}
 	</td>
-	{% if value[0]['AiringType']=='New' %}
+	{% if listings[1][0]['AiringType']=='New' %}
 		<td><strong>New Episode</strong></td>
 	{% else %}
 		<td><em>Repeat</em></td>
 	{% endif %}
 	</tr>
-
 
 
 {% endfor %}
