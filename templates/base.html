@@ -1,32 +1,50 @@
 <html>
 <head>
+    <link href='http://fonts.googleapis.com/css?family=Merriweather:400,700italic,900,700,300' rel='stylesheet' type='text/css'>
+
     <title>TV...or Not TV</title>
-    
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="http://localhost:5000/static/custom.css">
 </head>
 <body>
-  <div class="container-fluid">
-
-  <h1>TV...or Not TV</h1>
+<div class="container">
+  <h1><a href="/">TV...or Not TV</a></h1>
 
 <nav class="nav">
-<ul class="nav nav-tabs">
-<li role="presentation"><a href="/">Home</a></li>
+
+
+<div class="row">
+
+<div class="col-xs-12 col-sm-8 col-md-6">
+<ul class="nav nav-pills">
+
 {% if not session['logged_in'] %}
+
 <li role="presentation"><a href="/login">Log In</a></li>
+
 <li role="presentation"><a href="/signup">Sign up</a></li>
 {% endif %}
 {% if session['logged_in'] %}
+
 <li role="presentation"><a href="/favorites/">Favorites</a></li>
+
 <li role="presentation"><a href="/schedule/">TV Listings</a></li>
+
 <li role="presentation"><a href="/settings/">Settings</a></li>
+
 <li role="presentation"><a href="/logout">Log out</a></li>
+
+
 {% endif %}
+</div><!-- end col-sm-8 col-md-6 -->
+<div class="col-xs-12 col-sm-4 col-md-6 pull-right">
+
 <li role="presentation">
 <form class="nav nav-form" action="{{ url_for("search") }}" method="POST" role="search">
 <div class="form-group">
@@ -35,7 +53,10 @@
 <span class="input-group-btn">
        <button type="submit" class="btn btn-default nav-btn">Submit</button></span></div></div>
       </form>
-</li></ul>
+</li>
+</ul>
+
+</div><!-- end row-->
 </nav>
 
 {% with messages = get_flashed_messages() %}
@@ -45,12 +66,12 @@
 {{ message }}</div>
 {% endfor %}
 
-</div>
+
 {% endif %}
 {% endwith %}
 
 {% block body %}
 {% endblock %}
-</div>
+</div><!--end container-->
 </body>
 </html>
