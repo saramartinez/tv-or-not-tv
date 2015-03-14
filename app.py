@@ -54,8 +54,9 @@ def process_signup():
     ## removes punctuation and country code from phone number
     exclude = set(string.punctuation)
     phone = ''.join(ch for ch in phone if ch not in exclude)
-    if phone[0] == '1':
-        phone = phone[1:]
+    if phone:
+        if phone[0] == '1':
+            phone = phone[1:]
 
     existing_user = modelsession.query(User).filter(User.email == new_email).first()
 
@@ -397,7 +398,7 @@ def get_listings(user_id):
 
         ## if cached results exist AND they're recent, do this
         if cached_listings and CURRENT_TIMESTAMP - cached_timestamp < six_hours:
-            results_list = cached_listings.results
+            results_list = json.loads(cached_listings.results)
 
         ## if nothing is cached or the cached results aren't
         ## recent, do this
