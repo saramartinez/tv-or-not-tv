@@ -20,3 +20,8 @@ h1 a:hover{
 .divider{
 	padding-top:15px;
 }
+
+
+.table-header-time, .table-header-date, .table-header-channel{
+	width:10%;
+}

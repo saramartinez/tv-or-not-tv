@@ -6,36 +6,50 @@
 
 <h2>Search Results</h2>
 
-<h3><em>Choose which show(s) to add to your Favorites:</em></h3>
 
 <form action="/favorites" method="POST">
 
-<ul>
 
 {% for each in results %}
+	<div class="form-group">
+<div class="row">
+	<div class="col-md-12">
 
-<li><label><input type="checkbox" name="show" 
-value="{{ each['video']['ids']['cosmoId'] }}">{{ each['video']['masterTitle'] }}</label> 
+		<div class="panel panel-info">
+			<div class="panel-heading lead">
 
-{% if each['video']['images'] %}
+				<div class="input-group">
+					<input type="checkbox" id="{{ each['video']['ids']['cosmoId'] }}" name="show" value="{{ each['video']['ids']['cosmoId'] }}">
+					<label for="{{ each['video']['ids']['cosmoId'] }}"><h3 class="panel-title">&nbsp;&nbsp;&nbsp;Add "{{ each['video']['masterTitle'] }}" to favorites</h3></label>
+				</div><!--end input group-->
+			</div><!-- end panel-heading -->
 
-<p><img style="height:80px;" src="{{ each['video']['images'][0]['url'] }}" alt="{{ each['video']['masterTitle'] }}"></p>
+			<div class="panel-body">
+				{% if each['video']['images'] %}
+				<div class="col-md-7">
+					<img class="img-responsive" src="{{ each['video']['images'][0]['url'] }}" alt="{{ each['video']['masterTitle'] }}">
+				</div>
+				<div class="col-md-5">
+				{% else %}
+				<div class="col-md-12">
+				{% endif %} 
+				<p class="lead"><em>{{ each['video']['masterTitle'] }}</em>
+				{% if each['video']['synopsis'] %}&nbsp;&mdash;&nbsp;
+				{{ each['video']['synopsis']['synopsis'] }}
+				{% endif %}</p>
+				</div><!-- end cols -->
+			</div><!-- end panel-body -->
+		</div><!-- end panel -->
+	</div><!--end 12 cols-->
+</div><!-- end row -->
+</div>
 
-{% endif %}
-
-{% if each['video']['synopsis'] %}
-
-<p>{{ each['video']['synopsis']['synopsis'] }}</p>
-
-{% endif %}
-
-</li>
 
 {% endfor %}
 
 </ul>
 {% if session['logged_in'] %}
-<input type="submit" value="Add to Favorites">
+<button type="submit" class="btn btn-info" id="submit">Add to Favorites</button>
 {% else %}
 Please <a href="/login">log in</a> or <a href="/signup">sign up</a> to save favorites.
 {% endif %}
@@ -48,13 +62,13 @@ Please <a href="/login">log in</a> or <a href="/signup">sign up</a> to save favo
 
 <h4>Find TV shows to add to your personalized listings:</h4>
 
-<form action="{{ url_for("search") }}" method="POST">
-
-    <input type="text" name="query">
-    <input type="submit">
-
-</form>
-
+<form action="{{ url_for("search") }}" method="POST" role="search">
+<div class="form-group">
+<div class="input-group">
+        <input type="text" name="query" class="form-control" placeholder="Search">
+<span class="input-group-btn">
+       <button type="submit" class="btn btn-primary nav-btn">Submit</button></span></div></div>
+      </form>
 
 {% endif %}
 {% endblock %}

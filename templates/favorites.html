@@ -3,70 +3,85 @@
 {% block body %}
 
 {% if favorites %}
+
+
+{% for favorite in favorites %}
 <div class="row">
 <div class="col-md-12">
 
-{% for favorite in favorites %}
 <div class="panel panel-info">
   <div class="panel-heading lead">
     <!-- <h2 class="panel-title"> -->{{ favorite.show.title }}<!-- </h2> -->
   </div><!-- end panel-heading -->
 
-<div class="row">
   <div class="panel-body">
+  <div class="row">
 
+{% if favorite.show.img %}
 <div class="col-sm-12 col-md-4">
+{% else %}
+<div class="col-md-6">
+{% endif %}
 	<p>{{ favorite.show.synopsis }}</p>
 	{% if schedule %}
 
+ 	{% for listing in schedule %}
+ 	{% if listing['Title'] == favorite.show.title %}
+
 	<script>
 	$(document).ready(function() {
-	var air_time = moment.utc("{{ schedule[loop.index-1]['AiringTime'] }}").local();
+	var air_time = moment.utc("{{ listing['AiringTime'] }}").local();
 	air_time = air_time.format("LT on dddd, MMMM Do");
-	var from_now = moment("{{ schedule[loop.index-1]['AiringTime'] }}").fromNow();
+	var from_now = moment("{{ listing['AiringTime'] }}").fromNow();
 
-	$(".{{ schedule[loop.index-1]['ProgramId'] }}-date").html(air_time);
-	$(".{{ schedule[loop.index-1]['ProgramId'] }}-relative").html("  " + from_now);
+	$(".{{ listing['ProgramId'] }}-date").html(air_time);
+	$(".{{ listing['ProgramId'] }}-relative").html("  " + from_now);
 });
 	</script>
-	<p class="small"><strong>Next <em>new episode</em> airs<span class="{{ schedule[loop.index-1]['ProgramId'] }}-relative"></span> <a href="#" data-toggle="tooltip" title="{{ schedule[loop.index-1]['SourceLongName'] }}">on channel {{ schedule[loop.index-1]['Channel'] }}</a>:</strong> <em>"{{ schedule[loop.index-1]['EpisodeTitle'] }}"</em> &mdash; {{ schedule[loop.index-1]['Copy'] }}</p>
-
-	<p class="small"><strong>Watch at:</strong> <span class="{{ schedule[loop.index-1]['ProgramId'] }}-date"></span></p>
-
+		
+	<p class="small"><span class="label label-danger">NEW EPISODE</span> on <a href="#" data-toggle="tooltip" title="{{ listing['SourceLongName'] }}">channel {{ listing['Channel'] }}</a> <span class="{{ listing['ProgramId'] }}-relative"></span>: </p><p class="small"><em>"{{ listing['EpisodeTitle'] }}"</em> &mdash; {{ listing['Copy'] }}</p>
 
 
-	<p class="small">
+<p><span class="label label-info"><strong>Watch at</strong> <span class="{{ listing['ProgramId'] }}-date"></span></span></p>
 
-	{% endif %}
+{% else %}
+<p class="small">No new episodes of {{ favorite.show.title }} this week.</p>
+
+	{% endif %}<!-- end if listing['ProgramId'] == favorite.show.id -->
+	
 
 
+{% endfor %}<!-- end for listing in schedule-->
+{% endif %} <!-- end if schedule -->
 
-	</p>
-</div>
+
+</div><!-- end col sm 12 -->
 
 {% if favorite.show.img %}
 <div class="col-sm-12 col-md-8">
 <img class="img-responsive" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}">
 </div>
-{% endif %}
+{% endif %}<!-- end if image-->
 
-
+</div><!-- end row-->
 
   </div><!-- end panel body -->
-</div><!-- end row-->
 
 </div><!-- end panel -->
 
-{% endfor %}
+
+
 </div><!-- end col-md-12 -->
+
 
 </div><!--end row-->
 
+{% endfor %}<!--end for favorite in favorites-->
 
 
 {% else %}
 It looks like you don't have any favorites saved. Search for shows to add to your favorites, then see when they'll be on TV next.
-{% endif %}
+{% endif %}<!-- if favorites -->
 
 
 {% endblock %}

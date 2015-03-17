@@ -273,10 +273,10 @@ def search_results():
         json_results = json.loads(cached_search.results)
         results = json_results['searchResponse']['results']
     else:
-        api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=5&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + SIG
+        api_request = "http://api.rovicorp.com/search/v2.1/video/search?entitytype=tvseries&query=" + query + "&rep=1&include=synopsis%2Cimages&size=1&offset=0&language=en&country=US&format=json&apikey=" + ROVI_SEARCH_API_KEY + "&sig=" + SIG
 
         rovi_results = requests.get(api_request)
-
+        print rovi_results.status_code
         if rovi_results.status_code == 200:
             json_results = rovi_results.json()
 
@@ -358,14 +358,12 @@ def show_favorites():
         new_list = []
         for listings in schedule:
             for item in listings:
-                print item
-                if item[1][0]['AiringType'] == 'New':
-                    new_list.append(item[1][0])
-                    print new_list
-            # new_list.append(item[0][1][0])
+                if item[1]:
+                    if item[1][0]['AiringType'] == 'New':
+                        new_list.append(item[1][0])
     else:
         new_list = None
-        flash("Oops, there was an error getting listings for your favorites.")
+        flash("Oops, there was an error getting your favorites. Please try again.")
     print new_list
     return render_template("favorites.html", id=user_id, favorites=favorites, schedule=new_list)
 

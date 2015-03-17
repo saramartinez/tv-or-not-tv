@@ -17,7 +17,10 @@
 
 <div class="panel panel-info">
 <div class="panel-heading lead">Listings for <strong>{{ favorite.show.title }}</strong></div><!--end panel-heading-->
-		{% if schedule %}
+
+{% if schedule %}
+
+{% if schedule[loop.index-1] %}
 
 	<table class="table table-striped table-info table-responsive">
 	<thead> 
@@ -26,7 +29,6 @@
 		<th class="table-header-time">Time</th>
 		<th class="table-header-channel">Channel</th>
 		<th class="table-header-synopsis">Synopsis</th>
-		<th></th>
 	</tr>
 	</thead>
 
@@ -55,24 +57,21 @@
 	<td data-title="Time" class="{{ listings[1][0]['ProgramId'] }}-{{ listings[1][0]['AiringType'] }}-time"></td>
 
 	<td data-title="Channel">{% for i in listings[1] %}
-	<p><a href="#" data-toggle="tooltip" data-placement="right" title="{{ i['SourceLongName'] }}">{{ i['Channel'] }}</a> {% if i['HD'] %}<strong>(HD)</strong>{% endif %}</p>
+	<p><a href="#" data-toggle="tooltip" data-placement="bottom" title="{{ i['SourceLongName'] }}">{{ i['Channel'] }}</a> {% if i['HD'] %}<span class="label label-info">HD</span>{% endif %}</p>
 	{% endfor %}
 	</td>
 	
 	<td data-title="Synopsis">
-	{% if listings[1][0]['EpisodeTitle'] %}
-		<em>"{{ listings[1][0]['EpisodeTitle'] }}" —</em>
-	{% endif %}
 
+	{% if listings[1][0]['EpisodeTitle'] %}
+		<em>"{{ listings[1][0]['EpisodeTitle'] }}" </em>
+	{% endif %}
+{% if listings[1][0]['AiringType']=='New' %}<span class="label label-danger">New{% else %}<span class="label label-primary">Repeat{% endif %}</span> &mdash;
 	{% if listings[1][0]['Copy'] %}
 		{{ listings[1][0]['Copy'] }}
-	{% endif %}
+	{% endif %} 	
 	</td>
-	{% if listings[1][0]['AiringType']=='New' %}
-		<td data-title="New Episode"><strong>New Episode</strong></td>
-	{% else %}
-		<td data-title="Repeat"><em>Repeat</em></td>
-	{% endif %}
+	
 	</tr>
 
 
@@ -80,15 +79,19 @@
 	</tbody>
 </table>
 
-</div><!--end panel-->
-
-</div><!--end col-md-9-->
 		{% else %}
 			<ul><li>
 				No showtimes in the next week.
 			</li></ul>
 		{% endif %}
+
+
+</div><!--end panel-->
+
+</div><!--end col-md-9-->
 		</div><!--end row-->
+
+		{% endif %}
 
 	{% endfor %}
 
