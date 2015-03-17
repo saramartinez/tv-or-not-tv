@@ -1,22 +1,21 @@
 <html>
 <head>
-    <link href='http://fonts.googleapis.com/css?family=Merriweather:400,700italic,900,700,300' rel='stylesheet' type='text/css'>
-
     <title>TV...or Not TV</title>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+<link href='http://fonts.googleapis.com/css?family=Changa+One' rel='stylesheet' type='text/css'> 
+   <link rel="stylesheet" href="https://bootswatch.com/yeti/bootstrap.min.css">
+        <link rel="stylesheet" href="http://localhost:5000/static/css/magic-bootstrap-min.css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script src="http://localhost:5000/static/js/bootstrap.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="http://localhost:5000/static/custom.css">
+    <link rel="stylesheet" type="text/css" href="http://localhost:5000/static/css/custom.css">
 </head>
 <body>
+
 <div class="container">
   <h1><a href="/">TV...or Not TV</a></h1>
 
-<nav class="nav">
+<nav id="main-nav" class="nav">
 
 
 <div class="row">
@@ -26,19 +25,19 @@
 
 {% if not session['logged_in'] %}
 
-<li role="presentation"><a href="/login">Log In</a></li>
+<li id="login" role="presentation"><a id="show_login" href="{{ url_for('show_login') }}">Log In</a></li>
 
-<li role="presentation"><a href="/signup">Sign up</a></li>
+<li id="signup" role="presentation"><a id="show_signup" href="{{ url_for('show_signup') }}">Sign up</a></li>
 {% endif %}
 {% if session['logged_in'] %}
 
-<li role="presentation"><a href="/favorites/">Favorites</a></li>
+<li role="presentation"><a id="show_favorites" href="{{ url_for('show_favorites') }}">Home</a></li>
 
-<li role="presentation"><a href="/schedule/">TV Listings</a></li>
+<li role="presentation"><a id="show_listings" href="{{ url_for('show_listings') }}">Full Listings</a></li>
 
-<li role="presentation"><a href="/settings/">Settings</a></li>
+<li role="presentation"><a id="user_settings" href="{{ url_for('user_settings') }}">Settings</a></li>
 
-<li role="presentation"><a href="/logout">Log out</a></li>
+<li role="presentation"><a id="logout" href="{{ url_for('logout') }}">Log out</a></li>
 
 
 {% endif %}
@@ -51,9 +50,10 @@
 <div class="input-group">
         <input type="text" name="query" class="form-control" placeholder="Search">
 <span class="input-group-btn">
-       <button type="submit" class="btn btn-default nav-btn">Submit</button></span></div></div>
+       <button type="submit" class="btn btn-primary nav-btn">Submit</button></span></div></div>
       </form>
 </li>
+
 </ul>
 
 </div><!-- end row-->
@@ -63,15 +63,25 @@
 {% if messages %}
 {% for message in messages %}
   <div class="alert alert-warning alert-dismissible" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-{{ message }}</div>
+{{ message }} </div>
 {% endfor %}
 
 
 {% endif %}
 {% endwith %}
 
+<div class="divider"></div>
 {% block body %}
 {% endblock %}
+<script>
+$(document).ready(function() {
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip();
+  $("#{{request.endpoint}}").parent().addClass("active");
+});
+});
+
+</script>
 </div><!--end container-->
 </body>
 </html>

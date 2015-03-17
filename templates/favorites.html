@@ -1,21 +1,66 @@
 {% extends 'base.html' %}
+{% set active_page = "favorites" %}
 {% block body %}
 
 {% if favorites %}
-<ul>
+<div class="row">
+<div class="col-md-12">
+
 {% for favorite in favorites %}
-<li>
-{{ favorite.show.title }}
+<div class="panel panel-info">
+  <div class="panel-heading lead">
+    <!-- <h2 class="panel-title"> -->{{ favorite.show.title }}<!-- </h2> -->
+  </div><!-- end panel-heading -->
+
+<div class="row">
+  <div class="panel-body">
+
+<div class="col-sm-12 col-md-4">
+	<p>{{ favorite.show.synopsis }}</p>
+	{% if schedule %}
+
+	<script>
+	$(document).ready(function() {
+	var air_time = moment.utc("{{ schedule[loop.index-1]['AiringTime'] }}").local();
+	air_time = air_time.format("LT on dddd, MMMM Do");
+	var from_now = moment("{{ schedule[loop.index-1]['AiringTime'] }}").fromNow();
+
+	$(".{{ schedule[loop.index-1]['ProgramId'] }}-date").html(air_time);
+	$(".{{ schedule[loop.index-1]['ProgramId'] }}-relative").html("  " + from_now);
+});
+	</script>
+	<p class="small"><strong>Next <em>new episode</em> airs<span class="{{ schedule[loop.index-1]['ProgramId'] }}-relative"></span> <a href="#" data-toggle="tooltip" title="{{ schedule[loop.index-1]['SourceLongName'] }}">on channel {{ schedule[loop.index-1]['Channel'] }}</a>:</strong> <em>"{{ schedule[loop.index-1]['EpisodeTitle'] }}"</em> &mdash; {{ schedule[loop.index-1]['Copy'] }}</p>
+
+	<p class="small"><strong>Watch at:</strong> <span class="{{ schedule[loop.index-1]['ProgramId'] }}-date"></span></p>
+
+
+
+	<p class="small">
+
+	{% endif %}
+
+
+
+	</p>
+</div>
 
 {% if favorite.show.img %}
-<p><img class="img-thumbnail img-responsive" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}"></p>
+<div class="col-sm-12 col-md-8">
+<img class="img-responsive" src="{{ favorite.show.img }}" alt="{{ favorite.show.title }}">
+</div>
 {% endif %}
 
 
 
-</li>
+  </div><!-- end panel body -->
+</div><!-- end row-->
+
+</div><!-- end panel -->
+
 {% endfor %}
-</ul>
+</div><!-- end col-md-12 -->
+
+</div><!--end row-->
 
 
 

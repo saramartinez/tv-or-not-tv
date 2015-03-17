@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% set active_page = "signup" %}
 {% block body %}
 <script>
 
@@ -82,7 +83,7 @@ $("#timezone-input").append(tz);
     <label for="password">Password</label>
     <input class="form-control" type="password" name="password" placeholder="Password" required />
 </div>
-    <button type="submit" id="submit" class="btn btn-default" value="Sign Up">Sign Up</button>
+    <button type="submit" id="submit" class="btn btn-info" value="Sign Up">Sign Up</button>
 </form>
 </div></div>
 {% endblock %}

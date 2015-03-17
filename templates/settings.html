@@ -1,18 +1,13 @@
 {% extends 'base.html' %}
+{% set active_page = "settings" %}
+
 {% block body %}
-
+<div class="row">
+<div class="col-md-12">
 <h2>User Profile</h2>
-<script>
-$(document).ready(function() {
-
-$("#edit-profile").click( function() {
-	$("#settings").load("/settings/edit") });
-});
 
 
-</script>
-
-<div id="settings">
+<div class="settings">
 
 <p><strong>Name:</strong> {{ user.name }}</p>
 
@@ -27,9 +22,16 @@ $("#edit-profile").click( function() {
 <p><strong>Service Provider:</strong> {{ user.service.name }}</p>
 
 <p><strong>Password:</strong> <em>Not shown</em></p>
+<script>
+$(document).ready(function() {
 
-<p><button id="edit-profile" class="btn btn-default" type="button">Edit Settings</button></p>
+$("#edit-profile").click( function() {
+	$(".settings").load("/settings/edit") });
+});
+</script>
+<button id="edit-profile" class="btn-info btn btn-default" type="button">Edit Settings</button>
 
-</div>
+</div><!-- end settings div-->
 
+</div></div>
 {% endblock %}

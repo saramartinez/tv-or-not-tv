@@ -5,3 +5,5 @@ examples/
 test.html
 *.db
 /node_modules
+/static/fonts/
+/static/old/

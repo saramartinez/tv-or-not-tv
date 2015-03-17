@@ -353,8 +353,21 @@ def show_favorites():
     if session['id']:
         user_id = session['id']
         favorites = modelsession.query(Favorite).filter(Favorite.user_id == user_id).all()
-        favorite = favorites.sort()
-    return render_template("favorites.html", id=user_id, favorites=favorites)
+        schedule = get_listings(user_id)
+    if schedule:
+        new_list = []
+        for listings in schedule:
+            for item in listings:
+                print item
+                if item[1][0]['AiringType'] == 'New':
+                    new_list.append(item[1][0])
+                    print new_list
+            # new_list.append(item[0][1][0])
+    else:
+        new_list = None
+        flash("Oops, there was an error getting listings for your favorites.")
+    print new_list
+    return render_template("favorites.html", id=user_id, favorites=favorites, schedule=new_list)
 
 @app.route("/schedule/") ## paging int; 1 by default then increase
 def show_listings():
@@ -369,7 +382,7 @@ def show_listings():
 @app.route("/listings/")
 def get_listings(user_id):
     """
-    Gets user's first five favorites from database, then
+    Gets user's first 5 favorites from database, then
     determine's user's service_id, current datetime and
     5 days from now to build API query. Results with
     broadcast times append to list to be returned to HTML.
@@ -400,10 +413,11 @@ def get_listings(user_id):
         if cached_listings and CURRENT_TIMESTAMP - cached_timestamp < six_hours:
             results_list = json.loads(cached_listings.results)
 
+        else:
         ## if nothing is cached or the cached results aren't
         ## recent, do this
-        else:
-            api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=5&duration=10080&inprogress=true&startdate=%s&pagesize=6&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
+
+            api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=1&duration=10080&inprogress=true&startdate=%s&pagesize=5&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
             rovi_results = requests.get(api_request)
 

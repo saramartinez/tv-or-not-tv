@@ -1,0 +1,22 @@
+a:hover{
+	text-decoration: none;
+}
+
+
+h1{
+	font-size: 5em;
+	font-family: 'Changa One', cursive;
+}
+
+h1 a{
+	color: #56284f;
+}
+
+h1 a:hover{
+	text-decoration: none;
+	color:#56284f;
+}
+
+.divider{
+	padding-top:15px;
+}
