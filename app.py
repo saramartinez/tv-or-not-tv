@@ -408,7 +408,7 @@ def get_listings(user_id):
 
         ## if cached results exist AND they're recent, do this
         if cached_listings and CURRENT_TIMESTAMP - cached_timestamp < six_hours:
-            results_list = json.loads(cached_listings.results)
+            results_list = cached_listings.results
 
         else:
         ## if nothing is cached or the cached results aren't
