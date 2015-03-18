@@ -16,8 +16,10 @@ Python, Flask, Jinja, SQLAlchemy, Javascript, jQuery, AJAX, [Moment.js](http://m
 Users can create and log into an account to save favorites and create a personalized TV schedule.
 ##### Personalized Listings
 Users search for TV shows and, if logged in, can save favorites to display on the home page and in a personalized listings grid.
+![Personalized listings screenshot](http://s27.postimg.org/68y2xhftv/Screen_Shot_2015_03_17_at_7_58_43_PM.png)
 ##### Preview new episodes
 On the home screen, users will always find an image and summary of each of their favorite TV shows along with a details and a preview of the upcoming new episode. If no new episodes are airing this week, only the TV show image and description will appear on the home page. The listings tab will have all listings of repeat episodes.
+![Homepage screenshot](http://s14.postimg.org/l3t8tmtyp/Screen_Shot_2015_03_17_at_7_58_23_PM.png)
 ##### Daily text message for new episodes
 If users provide a phone number and opt in for text messaging, TV or Not TV makes use of the Twilio API and a continuous cron job to send text messages to the user every day at 2:30 p.m. if there is a new episode that night.
 ##### Caching
