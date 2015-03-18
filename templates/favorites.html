@@ -1,12 +1,8 @@
 {% extends 'base.html' %}
 {% set active_page = "favorites" %}
 {% block body %}
-
 {% if favorites %}
-
-
 {% for favorite in favorites %}
-
 <div class="row">
 <div class="col-md-12">
 
@@ -25,7 +21,6 @@
 	{% endif %}
 	<p>{{ favorite.show.synopsis }}</p>
 
-
 <p class="small new-episode-{{ favorite.show.cosmoid }}">No new episodes of {{ favorite.show.title }} this week.</p>
 </div><!-- end col sm 12 -->
 
@@ -36,27 +31,16 @@
 {% endif %}<!-- end if image-->
 
 </div><!-- end row-->
-
-  </div><!-- end panel body -->
-
+</div><!-- end panel body -->
 </div><!-- end panel -->
-
-
-
 </div><!-- end col-md-12 -->
-
-
 </div><!--end row-->
-
-
 	
 {% endfor %}<!--end for favorite in favorites-->
 
-
-
-{% else %}
+{% else %}<!-- if no favorites-->
 It looks like you don't have any favorites saved. Search for shows to add to your favorites, then see when they'll be on TV next.
-{% endif %}<!-- if favorites -->
+{% endif %}<!-- endif favorites -->
 
 {% if schedule %}
 	{% for listing in schedule %}
@@ -80,8 +64,8 @@ It looks like you don't have any favorites saved. Search for shows to add to you
 
 			});
 			</script>
-		{% endif %}
+		{% endif %}<!-- end if listing['Title']-->
+	{% endfor %}<!-- end for listings in schedule-->
+{% endif %} <!-- end if schedule -->
 
-		{% endfor %}
-	{% endif %} <!-- end if schedule -->
 {% endblock %}

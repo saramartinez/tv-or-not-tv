@@ -8,7 +8,6 @@ import hashlib
 import string
 from time import time, mktime
 from datetime import datetime
-from operator import itemgetter
 
 app = Flask(__name__)
 app.secret_key = os.environ['APP_SECRET_KEY']
@@ -217,7 +216,7 @@ def update_settings():
     ## removes punctuation and country code from phone number
     exclude = set(string.punctuation)
     new_phone = ''.join(ch for ch in new_phone if ch not in exclude)
-    
+
     if new_phone:
         if new_phone[0] == '1':
             new_phone = new_phone[1:]
@@ -430,7 +429,7 @@ def get_listings(user_id):
             grouped_listings = {}
             for each in results:
                 key = (each['AiringTime'], each['EpisodeTitle'])
-                grouped_listings.setdefault(key,[]).append(each)
+                grouped_listings.setdefault(key, []).append(each)
 
             grouped_listings = sorted(grouped_listings.iteritems())
 
