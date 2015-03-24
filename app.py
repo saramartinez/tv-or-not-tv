@@ -408,13 +408,13 @@ def get_listings(user_id):
 
         ## if cached results exist AND they're recent, do this
         if cached_listings and CURRENT_TIMESTAMP - cached_timestamp < six_hours:
-            results_list = json.loads(cached_listings.results)
+            results_list = cached_listings.results
 
         else:
         ## if nothing is cached or the cached results aren't
         ## recent, do this
 
-            api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=1&duration=10080&inprogress=true&startdate=%s&pagesize=5&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
+            api_request = "http://api.rovicorp.com/TVlistings/v9/listings/programdetails/%s/%s/info?locale=en-US&copytextformat=PlainText&include=Program&imagecount=1&duration=10080&inprogress=true&startdate=%s&pagesize=15&format=json&apikey=%s" % (serviceid, cosmoid, start, ROVI_LISTINGS_API_KEY)
 
             rovi_results = requests.get(api_request)
 
@@ -446,7 +446,7 @@ def get_listings(user_id):
                     service_id=serviceid,
                     show_id=cosmoid,
                     timestamp=NOW,
-                    results=json.dumps(results_list))
+                    results=results_list)
                 modelsession.add(store_results)
                 modelsession.commit()
 
