@@ -363,7 +363,6 @@ def show_favorites():
     else:
         new_list = None
         flash("Oops, there was an error getting your favorites. Please try again.")
-    print new_list
     return render_template("favorites.html", id=user_id, favorites=favorites, schedule=new_list)
 
 @app.route("/schedule/") ## paging int; 1 by default then increase
@@ -439,7 +438,7 @@ def get_listings(user_id):
             ## and results
             if cached_listings:
                 cached_listings.timestamp = NOW
-                cached_listings.results = results_list
+                cached_listings.results = json.dumps(results_list)
             else:
                 ## save JSON object to CachedListing
                 store_results = CachedListing(

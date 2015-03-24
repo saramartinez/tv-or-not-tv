@@ -1,9 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, BLOB, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
 
-ENGINE = create_engine("sqlite:///tv.db", echo=True)
+ENGINE = create_engine("sqlite:///tv.db", echo=False)
 session = scoped_session(sessionmaker(bind=ENGINE,
                                       autocommit=False,
                                       autoflush=False))
@@ -125,7 +125,7 @@ class CachedListing(Base):
     service_id = Column(Integer, nullable=True)
     show_id = Column(Integer, nullable=True)
     timestamp = Column(DateTime)
-    results = Column(Text, nullable=True)
+    results = Column(BLOB, nullable=True)
 
     def __repr__(self):
         return "<CachedListing: id=%d, service_id=%d, show_id=%d, timestamp=%r, results=%r>" % (id, service_id, show_id, timestamp, results)
