@@ -55,7 +55,11 @@ It looks like you don't have any favorites saved. Search for shows to add to you
 			var channel = "{{ listing['Channel'] }}"
 			var channel_name = "{{ listing['SourceLongName'] }}"
 			var series_id = "{{ listing['SeriesId'] }}"
+			{% if listing['EpisodeTitle'] %}
 			var episode_title = "{{ listing['EpisodeTitle'] }}"
+			{% else %}
+			var episode_title = " "
+			{% endif %}
 			var copy = "{{ listing['Copy'] }}"
 
 			var info = '<span class="label label-danger">NEW EPISODE</span> on <a href="#" data-toggle="tooltip" title="' + channel_name + '">channel ' + channel + '</a> ' + from_now + ': </p><p class="small"><em>"' + episode_title + '"</em> &mdash; ' + copy + '</p><p><span class="label label-info"><strong>Watch at ' + air_time

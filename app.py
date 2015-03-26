@@ -276,6 +276,10 @@ def search_results():
 
         rovi_results = requests.get(api_request)
         print rovi_results.status_code
+        if rovi_results.status_code == 403:
+            rovi_results = requests.get(api_request)
+
+
         if rovi_results.status_code == 200:
             json_results = rovi_results.json()
 
