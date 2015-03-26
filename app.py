@@ -431,7 +431,10 @@ def get_listings(user_id):
 
             grouped_listings = {}
             for each in results:
-                key = (each['AiringTime'], each['EpisodeTitle'])
+                if each['EpisodeTitle']:
+                    key = (each['AiringTime'], each['EpisodeTitle'])
+                else:
+                    key = (each['AiringTime'], each['Copy'])
                 grouped_listings.setdefault(key, []).append(each)
 
             grouped_listings = sorted(grouped_listings.iteritems())
