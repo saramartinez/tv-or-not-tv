@@ -7,3 +7,4 @@ test.html
 /node_modules
 /static/fonts/
 /static/old/
+.env
