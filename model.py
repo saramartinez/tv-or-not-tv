@@ -11,7 +11,12 @@ session = scoped_session(sessionmaker(bind=ENGINE,
 Base = declarative_base()
 Base.query = session.query_property()
 
+
+# To create database run:
+# python -i model.py
+# ENGINE = create_engine("sqlite:///tv.db", echo=True)
 # Base.metadata.create_all(ENGINE)
+
 
 ### Class declarations
 

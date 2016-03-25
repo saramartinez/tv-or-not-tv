@@ -3,6 +3,35 @@ for Hackbright final project
 
 "TV...or Not TV" is a utility app that creates personalized TV listings based on a user's preferences and favorites. After selecting a TV service provider, users build a list of "favorite" shows which are organized into a listings schedule. The personalized schedule provides information on upcoming episodes including a synopsis, when to watch, channel information and if the episodes are new or in HD. Users can sign up to receive a text message notification to alert them when one of their favorites has a new episode that night.
 
+## Setup
+### Start virtual environment
+```
+virtualenv env
+pip install -r requirements.txt
+source env/bin/activate
+```
+
+### Set environmental variables:
+
+Update `example-secrets.sh` with your secret keys (example below) and save as `secrets.sh` so Git ignores it! Then run `source secrets.sh`
+```
+export APP_SECRET_KEY="your_app_secret"
+export ROVI_TV_LISTINGS_API_KEY="your_tv_listings_api_key"
+export ROVI_METADATA_SEARCH_API_KEY="your_search_api_key"
+export ROVI_METADATA_SHARED_SECRET="your_secret"
+```
+### Create database
+Open an interactive Python shell with `model.py` and configure sqlite engine.
+```
+python -i model.py
+ENGINE = create_engine("sqlite:///tv.db", echo=True)
+Base.metadata.create_all(ENGINE)
+```
+### Start app
+Run `python app.py` and open `localhost:5000` in browser.
+
+### Use TV or Not TV!!
+
 ## Technology
 
 ### Project Technology Stack:
